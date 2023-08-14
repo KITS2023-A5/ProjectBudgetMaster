@@ -5,10 +5,15 @@ import FormComponent from "../../components/form";
 import { Link } from "react-router-dom";
 import { FaLock, FaUserLarge } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
+import { useEffect } from "react";
 
 const cx = classNames.bind(styles);
 
 const LoginPage = () => {
+  useEffect(() => {
+    document.title = "Login";
+  }, []);
+
   return (
     <>
       <div className={cx("login__over")}>
@@ -20,7 +25,7 @@ const LoginPage = () => {
             initialValues={{
               remember: true,
             }}
-            onFinish={""}
+            onFinish={() => {}}
           >
             <Form.Item
               name="account"
@@ -69,9 +74,9 @@ const LoginPage = () => {
                 <Checkbox>Remember me</Checkbox>
               </Form.Item>
 
-              <a className={cx("login-form-forgot")} href="/">
+              <Link className={cx("login-form-forgot")} to="/resetPassword">
                 Forgot password
-              </a>
+              </Link>
             </Form.Item>
 
             <Form.Item>
