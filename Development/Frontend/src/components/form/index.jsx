@@ -1,22 +1,25 @@
+import PropTypes from "prop-types";
 import { Form } from "antd";
 import classNames from "classnames/bind";
 import styles from "./form.module.scss";
 
 const cx = classNames.bind(styles);
 
-const FormComponent = (props) => {
+const FormComponent = ({ children, name, className, onFinish, ...props }) => {
   return (
     <>
-      <Form
-        name={props.name}
-        className={props.className}
-        initialValues={props.initialValues}
-        onFinish={props.onFinish}
-      >
-        {props.children}
+      <Form name={name} className={className} onFinish={onFinish} {...props}>
+        {children}
       </Form>
     </>
   );
+};
+
+FormComponent.propTypes = {
+  children: PropTypes.node.isRequired,
+  name: PropTypes.string,
+  className: PropTypes.string,
+  onFinish: PropTypes.func,
 };
 
 export default FormComponent;
