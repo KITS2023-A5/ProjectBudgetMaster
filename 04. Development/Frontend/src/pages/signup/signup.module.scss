@@ -138,6 +138,11 @@
   }
 }
 
+.register-form-button:disabled:hover {
+  background: #0000000a !important;
+  opacity: 1;
+}
+
 .register__ortext {
   margin: 0 1rem;
   display: inline-block;
@@ -147,6 +152,7 @@
   text-align: center;
 }
 
+.register__toprivacylink,
 .register__tologinlink {
   cursor: pointer;
   color: $primaryColor;

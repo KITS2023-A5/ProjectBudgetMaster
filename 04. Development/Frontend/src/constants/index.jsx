@@ -1,5 +1,13 @@
 /* eslint-disable react-refresh/only-export-components */
-import { FaMars, FaMarsAndVenus, FaVenus } from "react-icons/fa6";
+import {
+  FaLinkedin,
+  FaMars,
+  FaMarsAndVenus,
+  FaSquareFacebook,
+  FaSquareGithub,
+  FaSquareYoutube,
+  FaVenus,
+} from "react-icons/fa6";
 import classNames from "classnames/bind";
 import styles from "../pages/signup/signup.module.scss";
 
@@ -44,5 +52,28 @@ export const GENDERS = [
         }}
       />
     ),
+  },
+];
+
+export const SOCIAL_ICON = [
+  {
+    name: "Facebook",
+    link: "http://www.facebook.com",
+    icon: <FaSquareFacebook className={cx("footer__social--icon")} />,
+  },
+  {
+    name: "Github",
+    link: "https://github.com/KITS2023-A5",
+    icon: <FaSquareGithub className={cx("footer__social--icon")} />,
+  },
+  {
+    name: "Linkedin",
+    link: "https://www.linkedin.com",
+    icon: <FaLinkedin className={cx("footer__social--icon")} />,
+  },
+  {
+    name: "Youtube",
+    link: "http://www.youtube.com",
+    icon: <FaSquareYoutube className={cx("footer__social--icon")} />,
   },
 ];
