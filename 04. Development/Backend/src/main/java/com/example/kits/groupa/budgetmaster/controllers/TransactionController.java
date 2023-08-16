@@ -8,11 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("api/transaction")
+@RequestMapping("api/user/transaction")
 public class TransactionController {
     private final JwtUtils jwtUtils;
     private final TransactionService transactionService;
@@ -37,10 +38,10 @@ public class TransactionController {
     }
 
     @PostMapping
-    public ResponseEntity<Transaction> createTransaction(@RequestHeader("Authorization") String authorizationHeader, @RequestBody TransactionRequest transactionRequest) {
+    public ResponseEntity<Transaction> createTransaction(@RequestHeader("Authorization") String authorizationHeader, @RequestBody TransactionRequest transactionRequest, @RequestParam(value = "receipt", required = false) MultipartFile receiptFile) {
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        Transaction transaction = transactionService.createTransaction(userId, transactionRequest);
+        Transaction transaction = transactionService.createTransaction(userId, transactionRequest, receiptFile);
         return new ResponseEntity<>(transaction, HttpStatus.CREATED);
     }
 

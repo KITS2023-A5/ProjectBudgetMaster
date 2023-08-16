@@ -9,6 +9,9 @@ import com.example.kits.groupa.budgetmaster.repositories.TransactionRepository;
 import com.example.kits.groupa.budgetmaster.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,7 +36,7 @@ public class TransactionService {
         return transactionRepository.findByUserId(userId);
     }
 
-    public Transaction createTransaction(Long userId, TransactionRequest transactionRequest) {
+    public Transaction createTransaction(Long userId, TransactionRequest transactionRequest, MultipartFile receiptFile){
         Transaction transaction = new Transaction();
         transaction.setAmount(transactionRequest.getAmount());
         transaction.setDescription(transactionRequest.getDescription());
@@ -44,6 +47,15 @@ public class TransactionService {
         transaction.setCategory(category);
         User user = userRepository.findById(userId).orElse(null);
         transaction.setUser(user);
+
+        try {
+            if (receiptFile != null && !receiptFile.isEmpty()) {
+                byte[] receiptBytes = receiptFile.getBytes();
+                transaction.setReceipt(receiptBytes);
+            }
+        } catch (IOException e) {
+
+        }
 
         return transactionRepository.save(transaction);
     }

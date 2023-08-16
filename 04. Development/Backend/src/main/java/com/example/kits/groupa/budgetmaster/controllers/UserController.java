@@ -42,4 +42,16 @@ public class UserController {
         userService.updatePassword(userId, request);
         return ResponseEntity.ok("Password updated successfully");
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestParam("email") String email) {
+        userService.createPasswordResetToken(email);
+        return ResponseEntity.ok("Password reset token has been sent to the provided email address.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestParam("token") String token, @RequestParam("newPassword") String newPassword) {
+        userService.resetPassword(token, newPassword);
+        return ResponseEntity.ok("Password has been successfully reset.");
+    }
 }

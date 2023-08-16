@@ -1,52 +1,63 @@
 package com.example.kits.groupa.budgetmaster.services;
 
+import com.example.kits.groupa.budgetmaster.entities.PasswordResetToken;
 import com.example.kits.groupa.budgetmaster.entities.User;
+import com.example.kits.groupa.budgetmaster.exception.NotFoundException;
 import com.example.kits.groupa.budgetmaster.payload.request.UpdatePasswordRequest;
 import com.example.kits.groupa.budgetmaster.payload.request.UpdateUserDto;
+import com.example.kits.groupa.budgetmaster.repositories.PasswordResetTokenRepository;
 import com.example.kits.groupa.budgetmaster.repositories.UserRepository;
 import com.example.kits.groupa.budgetmaster.util.NullAwareBeanUtilsBean;
 import org.apache.commons.beanutils.BeanUtilsBean;
+import org.apache.commons.beanutils.PropertyUtilsBean;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder){
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+
+    private final JavaMailSender mailSender;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PasswordResetTokenRepository passwordResetTokenRepository, JavaMailSender mailSender){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.mailSender = mailSender;
     }
 
     @Transactional
-    public User updateUser(Long userId, UpdateUserDto updateUserDto) {
+    public void updateUser(Long userId, UpdateUserDto updateUserDto) {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
 
             // Update the relevant properties from the DTO
-            user.setName(updateUserDto.getName());
-            user.setEmail(updateUserDto.getEmail());
-            // Copy non-null properties from updateUserDto to user
-            try {
-                BeanUtilsBean notNull = new NullAwareBeanUtilsBean();
-                notNull.copyProperties(user, updateUserDto);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                // Handle any exceptions that occur during property copying
-                // You can log the exception or throw a custom exception as needed
-            }
+            if (updateUserDto.getName() != null)
+                user.setName(updateUserDto.getName());
+            if (updateUserDto.getUsername() != null)
+                user.setUsername(updateUserDto.getUsername());
+            if (updateUserDto.getCurrency() != null)
+                user.setCurrency(updateUserDto.getCurrency());
 
             // Save the updated user to the database
             userRepository.save(user);
 
-            return user;
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
         }
@@ -78,5 +89,63 @@ public class UserService {
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
         }
+    }
+
+    public void createPasswordResetToken(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new NotFoundException("User not found with email: " + email);
+        }
+
+        // Generate a unique token
+        String token = UUID.randomUUID().toString();
+
+        // Create and save the password reset token
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setToken(token);
+        resetToken.setUser(user);
+        resetToken.setExpiryDate(LocalDateTime.now().plusHours(24)); // Set the expiry date/time
+        passwordResetTokenRepository.save(resetToken);
+
+        // Send the token to the user via email
+        sendPasswordResetEmail(user.getEmail(), token);
+    }
+
+    public void resetPassword(String token, String newPassword) {
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token);
+        if (resetToken == null || resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new NotFoundException("Invalid or expired token");
+        }
+
+        User user = resetToken.getUser();
+        // Update the user's password with the new password
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        // Save the updated user
+        userRepository.save(user);
+
+        // Delete the used password reset token
+        passwordResetTokenRepository.delete(resetToken);
+
+        sendPasswordResetNotificationEmail(user.getEmail());
+    }
+
+    private void sendPasswordResetEmail(String email, String token) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Password Reset Request");
+        message.setText("To reset your password, please click on the following link: "
+                + "http://localhost:8080/reset-password?token=" + token);
+
+        mailSender.send(message);
+    }
+
+    private void sendPasswordResetNotificationEmail(String email) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Password Reset Successful");
+        message.setText("Your password has been successfully reset.");
+
+        mailSender.send(message);
     }
 }

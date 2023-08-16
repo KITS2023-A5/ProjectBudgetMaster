@@ -7,6 +7,5 @@ import lombok.Getter;
 public class UpdateUserDto {
     private String name;
     private String username;
-    private String email; 
     private Currency currency;
 }
