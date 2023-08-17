@@ -5,6 +5,7 @@ import com.example.kits.groupa.budgetmaster.entities.enumeration.Type;
 import com.example.kits.groupa.budgetmaster.payload.request.TransactionRequest;
 import com.example.kits.groupa.budgetmaster.payload.request.TransactionUpdateRequest;
 import com.example.kits.groupa.budgetmaster.payload.response.TransactionInfo;
+import com.example.kits.groupa.budgetmaster.repositories.TransactionProjection;
 import com.example.kits.groupa.budgetmaster.repositories.TransactionRepository;
 import com.example.kits.groupa.budgetmaster.security.jwt.JwtUtils;
 import com.example.kits.groupa.budgetmaster.services.TransactionService;
@@ -31,10 +32,10 @@ public class TransactionController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<Transaction>> getTransactionByUser(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<List<TransactionProjection>> getTransactionByUser(@RequestHeader("Authorization") String authorizationHeader) {
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        List<Transaction> transaction = transactionService.getTransactionsByUser(userId);
+        List<TransactionProjection> transaction = transactionService.getTransactionsByUser(userId);
         if (transaction != null) {
             return new ResponseEntity<>(transaction, HttpStatus.OK);
         } else {
@@ -43,10 +44,10 @@ public class TransactionController {
     }
 
     @GetMapping("/type/{type}")
-    public ResponseEntity<List<Transaction>> getTransactionByType(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Type type) {
+    public ResponseEntity<List<TransactionProjection>> getTransactionByType(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Type type) {
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        List<Transaction> transaction = transactionService.getTransactionsByType(type, userId);
+        List<TransactionProjection> transaction = transactionService.getTransactionsByType(type, userId);
         if (transaction != null) {
             return new ResponseEntity<>(transaction, HttpStatus.OK);
         } else {
@@ -55,10 +56,10 @@ public class TransactionController {
     }
 
     @GetMapping("/category")
-    public ResponseEntity<List<Transaction>> getTransactionByCategoryName(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String category){
+    public ResponseEntity<List<TransactionProjection>> getTransactionByCategoryName(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String category){
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        List<Transaction> transaction = transactionService.getTransactionsByCategoryName(category, userId);
+        List<TransactionProjection> transaction = transactionService.getTransactionsByCategoryName(category, userId);
         if (transaction != null) {
             return new ResponseEntity<>(transaction, HttpStatus.OK);
         } else {
@@ -67,10 +68,10 @@ public class TransactionController {
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<Transaction>> getTransactionByCategory(@RequestHeader("Authorization") String authorizationHeader, @PathVariable int categoryId){
+    public ResponseEntity<List<TransactionProjection>> getTransactionByCategory(@RequestHeader("Authorization") String authorizationHeader, @PathVariable int categoryId){
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        List<Transaction> transaction = transactionService.getTransactionsByCategory(categoryId, userId);
+        List<TransactionProjection> transaction = transactionService.getTransactionsByCategory(categoryId, userId);
         if (transaction != null) {
             return new ResponseEntity<>(transaction, HttpStatus.OK);
         } else {
@@ -100,11 +101,11 @@ public class TransactionController {
         }
     }
 
-    @DeleteMapping("/{transactionId}")
-    public ResponseEntity<Void> deleteTransaction(@RequestHeader("Authorization") String authorizationHeader, @PathVariable int transactionId) {
-        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
-        Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        transactionService.deleteTransaction(userId, transactionId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
+//    @DeleteMapping("/{transactionId}")
+//    public ResponseEntity<Void> deleteTransaction(@RequestHeader("Authorization") String authorizationHeader, @PathVariable int transactionId) {
+//        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+//        Long userId = jwtUtils.getUserIdFromJwtToken(token);
+//        transactionService.deleteTransaction(userId, transactionId);
+//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//    }
 }

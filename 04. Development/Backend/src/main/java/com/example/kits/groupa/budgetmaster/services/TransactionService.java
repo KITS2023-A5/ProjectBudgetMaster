@@ -8,6 +8,7 @@ import com.example.kits.groupa.budgetmaster.payload.request.TransactionRequest;
 import com.example.kits.groupa.budgetmaster.payload.request.TransactionUpdateRequest;
 import com.example.kits.groupa.budgetmaster.payload.response.TransactionInfo;
 import com.example.kits.groupa.budgetmaster.repositories.CategoryRepository;
+import com.example.kits.groupa.budgetmaster.repositories.TransactionProjection;
 import com.example.kits.groupa.budgetmaster.repositories.TransactionRepository;
 import com.example.kits.groupa.budgetmaster.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class TransactionService {
         this.userRepository = userRepository;
     }
 
-    public List<Transaction> getTransactionsByUser(Long userId) {
+    public List<TransactionProjection> getTransactionsByUser(Long userId) {
         return transactionRepository.findByUserId(userId);
     }
 
@@ -68,15 +69,15 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    public List<Transaction> getTransactionsByType(Type type, Long userId) {
+    public List<TransactionProjection> getTransactionsByType(Type type, Long userId) {
         return transactionRepository.findAllByType(type, userId);
     }
 
-    public List<Transaction> getTransactionsByCategoryName(String category, Long userId) {
+    public List<TransactionProjection> getTransactionsByCategoryName(String category, Long userId) {
         return transactionRepository.findAllByCategoryName(category, userId);
     }
 
-    public List<Transaction> getTransactionsByCategory(int categoryId, Long userId) {
+    public List<TransactionProjection> getTransactionsByCategory(int categoryId, Long userId) {
         return transactionRepository.findAllByCategory(categoryId, userId);
     }
 
@@ -96,10 +97,10 @@ public class TransactionService {
         }
     }
 
-    public void deleteTransaction(Long userId, int transactionId) {
-        Transaction existingTransaction = transactionRepository.findByTransactionIdAndUserId(transactionId, userId);
-        if (existingTransaction != null) {
-            transactionRepository.delete(existingTransaction);
-        }
-    }
+//    public void deleteTransaction(Long userId, int transactionId) {
+//        Transaction existingTransaction = transactionRepository.findByTransactionIdAndUserId(transactionId, userId);
+//        if (existingTransaction != null) {
+//            transactionRepository.delete(existingTransaction);
+//        }
+//    }
 }

@@ -13,21 +13,23 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Integer>{
 
-    @Query("SELECT t FROM Transaction t WHERE t.user.userId = :userId")
-    List<Transaction> findByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT t FROM Transaction t WHERE t.transactionId=:transactionId and t.user.userId = :userId")
-    Transaction findByTransactionIdAndUserId(@Param("transactionId")Integer transactionId, @Param("userId") Long userId);
+    @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, t.updatedTime AS updatedTime, t.receipt AS receipt, t.type AS type FROM Transaction t WHERE t.user.userId = :userId")
+    List<TransactionProjection> findByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT t FROM Transaction t WHERE t.type = :type and t.user.userId = :userId")
-    List<Transaction> findAllByType(@Param("type") Type type, @Param("userId") Long userId);
+    @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, t.updatedTime AS updatedTime, t.receipt AS receipt, t.type AS type FROM Transaction t WHERE t.transactionId = :transactionId AND t.user.userId = :userId")
+    TransactionProjection findByTransactionIdAndUserId(@Param("transactionId") Integer transactionId, @Param("userId") Long userId);
 
-    @Query("SELECT t FROM Transaction t WHERE t.category.name LIKE %:category% and t.user.userId = :userId")
-    List<Transaction> findAllByCategoryName(@Param("category") String category, @Param("userId") Long userId);
+    @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, t.updatedTime AS updatedTime, t.receipt AS receipt, t.type AS type FROM Transaction t WHERE t.type = :type AND t.user.userId = :userId")
+    List<TransactionProjection> findAllByType(@Param("type") Type type, @Param("userId") Long userId);
 
-    @Query("SELECT t FROM Transaction t WHERE t.category.categoryId = :categoryId and t.user.userId = :userId")
-    List<Transaction> findAllByCategory(@Param("categoryId") int categoryId, @Param("userId") Long userId);
+    @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, t.updatedTime AS updatedTime, t.receipt AS receipt, t.type AS type FROM Transaction t WHERE t.category.name LIKE %:category% AND t.user.userId = :userId")
+    List<TransactionProjection> findAllByCategoryName(@Param("category") String category, @Param("userId") Long userId);
+
+    @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, t.updatedTime AS updatedTime, t.receipt AS receipt, t.type AS type FROM Transaction t WHERE t.category.categoryId = :categoryId AND t.user.userId = :userId")
+    List<TransactionProjection> findAllByCategory(@Param("categoryId") int categoryId, @Param("userId") Long userId);
 }
