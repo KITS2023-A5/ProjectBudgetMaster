@@ -1,20 +1,25 @@
-import { Drawer, Menu } from "antd";
+import { Drawer } from "antd";
 import Sider from "antd/es/layout/Sider";
 import classNames from "classnames/bind";
-import { FaCamera } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
-import styles from "./sidebar.module.scss";
+import { Link, useLocation } from "react-router-dom";
+import logoImg from "../../assets/images/logo1600.png";
+import bgImg4 from "../../assets/images/sidebar-img4.jpg";
 import useWindowResize from "../../hooks/useWindowResize";
 import { toggleCollapsed } from "../../redux/slices/collapsedSlice";
+import MenuItems from "../menuItems";
+import styles from "./sidebar.module.scss";
+import { useState } from "react";
 
 const cx = classNames.bind(styles);
 
 const Sidebar = () => {
-  // const collapsed = useSelector((state) => state.collapsed);
+  const { pathname } = useLocation();
   const windownSize = useWindowResize();
-
-  const collapsed = useSelector((state) => state.collapsed);
   const dispatch = useDispatch();
+  const collapsed = useSelector((state) => state.collapsed);
+
+  const [currentPath, setCurrentPath] = useState(pathname);
 
   const handleDrawerToggle = () => {
     dispatch(toggleCollapsed());
@@ -24,9 +29,9 @@ const Sidebar = () => {
     dispatch(toggleCollapsed());
   };
 
-  // const {
-  //   token: { colorBgContainer },
-  // } = theme.useToken();
+  const handleClickMenuItem = (e) => {
+    setCurrentPath(e.key);
+  };
 
   return (
     <>
@@ -37,69 +42,31 @@ const Sidebar = () => {
           collapsed={collapsed}
           onCollapse={handleCollapseToggle}
           width={260}
-          style={{
-            overflow: "auto",
-            height: "100vh",
-            position: "sticky",
-            zIndex: "5",
-            left: 0,
-            top: 0,
-            bottom: 0,
-          }}
           theme="light"
+          style={{
+            backgroundImage: `url(${bgImg4})`,
+          }}
+          className={cx("sidebar__sider")}
         >
-          <div className="sidebar__logo" />
-          <Menu
-            theme="light"
-            mode="inline"
-            defaultSelectedKeys={["1"]}
-            items={[
-              {
-                key: "1",
-                icon: <FaCamera />,
-                label: "nav 1",
-              },
-              {
-                key: "2",
-                icon: <FaCamera />,
-                label: "nav 2",
-              },
-              {
-                key: "3",
-                icon: <FaCamera />,
-                label: "nav 3",
-              },
-            ]}
-          />
+          <Link to={"/"} className={cx("header__link")}>
+            <div className={cx("sidebar__logo")}>
+              <img
+                src={logoImg}
+                alt="logo"
+                className={cx("sidebar__logo--img")}
+              />
+            </div>
+          </Link>
+          <MenuItems onClick={handleClickMenuItem} currentPath={currentPath} />
         </Sider>
       ) : (
         <Drawer
           placement={"left"}
           onClose={handleDrawerToggle}
           open={collapsed}
+          className={cx("sidebar__drawer")}
         >
-          <Menu
-            theme="light"
-            mode="inline"
-            defaultSelectedKeys={["1"]}
-            items={[
-              {
-                key: "1",
-                icon: <FaCamera />,
-                label: "nav 1",
-              },
-              {
-                key: "2",
-                icon: <FaCamera />,
-                label: "nav 2",
-              },
-              {
-                key: "3",
-                icon: <FaCamera />,
-                label: "nav 3",
-              },
-            ]}
-          />
+          <MenuItems onClick={handleClickMenuItem} currentPath={currentPath} />
         </Drawer>
       )}
     </>
