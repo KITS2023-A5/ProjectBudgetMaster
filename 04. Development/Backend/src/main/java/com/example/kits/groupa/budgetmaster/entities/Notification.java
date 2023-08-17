@@ -17,6 +17,7 @@ public class Notification {
     private int notificationId;
     private String description;
 
+    @Enumerated(EnumType.STRING)
     private NotiStatus notiStatus;
 
     @ManyToOne

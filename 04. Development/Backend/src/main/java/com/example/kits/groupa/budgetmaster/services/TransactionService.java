@@ -3,7 +3,9 @@ package com.example.kits.groupa.budgetmaster.services;
 import com.example.kits.groupa.budgetmaster.entities.Category;
 import com.example.kits.groupa.budgetmaster.entities.Transaction;
 import com.example.kits.groupa.budgetmaster.entities.User;
+import com.example.kits.groupa.budgetmaster.entities.enumeration.Type;
 import com.example.kits.groupa.budgetmaster.payload.request.TransactionRequest;
+import com.example.kits.groupa.budgetmaster.payload.response.TransactionInfo;
 import com.example.kits.groupa.budgetmaster.repositories.CategoryRepository;
 import com.example.kits.groupa.budgetmaster.repositories.TransactionRepository;
 import com.example.kits.groupa.budgetmaster.repositories.UserRepository;
@@ -11,9 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.Deflater;
 
 @Service
 public class TransactionService {
@@ -28,15 +33,11 @@ public class TransactionService {
         this.userRepository = userRepository;
     }
 
-    public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAll();
-    }
-
     public List<Transaction> getTransactionsByUser(Long userId) {
         return transactionRepository.findByUserId(userId);
     }
 
-    public Transaction createTransaction(Long userId, TransactionRequest transactionRequest, MultipartFile receiptFile){
+    public Transaction createTransaction(Long userId, TransactionRequest transactionRequest, MultipartFile receiptFile) throws IOException {
         Transaction transaction = new Transaction();
         transaction.setAmount(transactionRequest.getAmount());
         transaction.setDescription(transactionRequest.getDescription());
@@ -48,16 +49,19 @@ public class TransactionService {
         User user = userRepository.findById(userId).orElse(null);
         transaction.setUser(user);
 
-        try {
-            if (receiptFile != null && !receiptFile.isEmpty()) {
-                byte[] receiptBytes = receiptFile.getBytes();
-                transaction.setReceipt(receiptBytes);
-            }
-        } catch (IOException e) {
-
-        }
-
+//        try {
+//            if (receiptFile != null && !receiptFile.isEmpty()) {
+//                byte[] receiptBytes = receiptFile.getBytes();
+//                transaction.setReceipt(receiptBytes);
+//            }
+//        } catch (IOException e) {
+//
+//        }
         return transactionRepository.save(transaction);
+    }
+
+    public List<Transaction> getTransactionsByType(Type type, Long userId) {
+        return transactionRepository.findAllByType(type, userId);
     }
 
     public void deleteTransaction(Long userId, int transactionId) {

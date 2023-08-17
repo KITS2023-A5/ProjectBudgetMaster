@@ -5,12 +5,9 @@ import com.example.kits.groupa.budgetmaster.entities.User;
 import com.example.kits.groupa.budgetmaster.exception.NotFoundException;
 import com.example.kits.groupa.budgetmaster.payload.request.UpdatePasswordRequest;
 import com.example.kits.groupa.budgetmaster.payload.request.UpdateUserDto;
+import com.example.kits.groupa.budgetmaster.payload.response.UserInfo;
 import com.example.kits.groupa.budgetmaster.repositories.PasswordResetTokenRepository;
 import com.example.kits.groupa.budgetmaster.repositories.UserRepository;
-import com.example.kits.groupa.budgetmaster.util.NullAwareBeanUtilsBean;
-import org.apache.commons.beanutils.BeanUtilsBean;
-import org.apache.commons.beanutils.PropertyUtilsBean;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,8 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,6 +34,16 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.mailSender = mailSender;
+    }
+
+    public UserInfo getUserInfo(Long userId){
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            return new UserInfo(user.getName(), user.getUsername(), user.getEmail(), user.getImage(), user.getCurrency());
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
+        }
     }
 
     @Transactional

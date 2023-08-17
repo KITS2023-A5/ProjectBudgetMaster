@@ -28,7 +28,10 @@ public class User {
     @Lob
     private byte[] image;
 
+    @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
+
+    @Enumerated(EnumType.STRING)
     private Currency currency;
 
     @ManyToMany(fetch = FetchType.LAZY)

@@ -25,6 +25,7 @@ public class Transaction {
     @Lob
     private byte[] receipt;
 
+    @Enumerated(EnumType.STRING)
     private Type type;
 
     @ManyToOne

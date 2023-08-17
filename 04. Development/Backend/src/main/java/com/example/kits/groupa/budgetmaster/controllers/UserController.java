@@ -3,6 +3,7 @@ package com.example.kits.groupa.budgetmaster.controllers;
 import com.example.kits.groupa.budgetmaster.entities.User;
 import com.example.kits.groupa.budgetmaster.payload.request.UpdatePasswordRequest;
 import com.example.kits.groupa.budgetmaster.payload.request.UpdateUserDto;
+import com.example.kits.groupa.budgetmaster.payload.response.UserInfo;
 import com.example.kits.groupa.budgetmaster.security.jwt.JwtUtils;
 import com.example.kits.groupa.budgetmaster.services.UserService;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,15 @@ public class UserController {
     public UserController(JwtUtils jwtUtils, UserService userService) {
         this.jwtUtils = jwtUtils;
         this.userService = userService;
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<UserInfo> getUserInfo(@RequestHeader("Authorization") String authorizationHeader) {
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+        Long userId = jwtUtils.getUserIdFromJwtToken(token);
+
+        UserInfo user = userService.getUserInfo(userId);
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping("/update")
