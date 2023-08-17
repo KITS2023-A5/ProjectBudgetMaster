@@ -3,6 +3,7 @@ package com.example.kits.groupa.budgetmaster.controllers;
 import com.example.kits.groupa.budgetmaster.entities.Role;
 import com.example.kits.groupa.budgetmaster.entities.User;
 import com.example.kits.groupa.budgetmaster.entities.enumeration.ERole;
+import com.example.kits.groupa.budgetmaster.entities.enumeration.UserStatus;
 import com.example.kits.groupa.budgetmaster.payload.request.LoginRequest;
 import com.example.kits.groupa.budgetmaster.payload.request.SignupRequest;
 import com.example.kits.groupa.budgetmaster.payload.response.JwtResponse;
@@ -14,6 +15,8 @@ import com.example.kits.groupa.budgetmaster.security.service.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -45,6 +49,9 @@ public class AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
+    @Autowired
+    JavaMailSender javaMailSender;
+
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
@@ -52,17 +59,14 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
-
+        String accessToken = jwtUtils.generateJwtToken(authentication);
+        String refreshToken = jwtUtils.generateRefreshToken(authentication);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
-                roles));
+        return ResponseEntity.ok(new JwtResponse(accessToken,
+                refreshToken));
     }
 
     @PostMapping("/signup")
@@ -85,6 +89,10 @@ public class AuthController {
                 signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()));
+
+        user.setUserStatus(UserStatus.DISABLED);
+        String activationToken = UUID.randomUUID().toString();
+        user.setActivationToken(activationToken);
 
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
@@ -113,6 +121,33 @@ public class AuthController {
         user.setRoles(roles);
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        String activationLink = "http://localhost:8080/activate?token=" + activationToken; // Replace with your activation endpoint URL
+        String emailBody = "Please click the following link to activate your account: " + activationLink;
+        String emailSubject = "Account Activation";
+
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(user.getEmail());
+        mailMessage.setSubject(emailSubject);
+        mailMessage.setText(emailBody);
+
+        javaMailSender.send(mailMessage);
+
+        return ResponseEntity.ok(new MessageResponse("User registered successfully! Please check your email for activation instructions."));
+    }
+
+    @GetMapping("/activate")
+    public ResponseEntity<?> activateAccount(@RequestParam("token") String activationToken) {
+        User user = userRepository.findByActivationToken(activationToken);
+
+        if (user == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Invalid activation token."));
+        }
+
+        user.setUserStatus(UserStatus.ACTIVE);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new MessageResponse("Account activated successfully!"));
     }
 }

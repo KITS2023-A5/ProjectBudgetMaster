@@ -1,63 +1,168 @@
-//package com.example.kits.groupa.budgetmaster.services;
-//
-////import com.example.kits.groupa.budgetmaster.dto.UserRegister;
-//import com.example.kits.groupa.budgetmaster.entities.User;
-//import com.example.kits.groupa.budgetmaster.repositories.UserRepository;
-//
-//import org.apache.commons.validator.routines.EmailValidator;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-//import org.springframework.stereotype.Service;
-//import org.springframework.transaction.annotation.Transactional;
-//import org.springframework.web.server.ResponseStatusException;
-//
-//import java.util.Optional;
-//
-//@Service
-//public class UserService {
-//    private final UserRepository userRepository;
-//
-//    @Autowired
-//    private BCryptPasswordEncoder bCryptPasswordEncoder;
-//
-//    @Autowired
-//    public UserService(UserRepository userRepository) {
-//        this.userRepository = userRepository;
-//        this.bCryptPasswordEncoder = new BCryptPasswordEncoder();
-//    }
-//
-//    @Transactional
-//    public void registerNewUser(UserRegister userRegister) {
-//        String email = userRegister.getEmail();
-//        String username = userRegister.getUsername();
-//        Optional<User> mailUser = userRepository.findUserByEmail(email);
-//        if ((email!=null) && (mailUser.isPresent()))
-//        {
-//            //BAD REQUEST da ton tai email
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Already exists email");
-//        }
-//        if (!EmailValidator.getInstance().isValid(email) || email.length() > 60)
-//        {
-//            //khong phai email
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid email");
-//        }
-//        Optional<User> userNameUser = userRepository.findUserByUsername(username);
-//        if ((username!=null) && (userNameUser.isPresent()))
-//        {
-//            //BAD REQUEST da ton tai username
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Already exists userName");
-//        }
-//        if (userRegister.getPassword().length() < 8)
-//        {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Weak password");
-//        }
-//        User newUser = new User();
-//        newUser.setName(userRegister.getName());
-//        newUser.setEmail(userRegister.getEmail());
-//        newUser.setUsername(userRegister.getUsername());
-//        newUser.setPassword(bCryptPasswordEncoder.encode(userRegister.getPassword()));
-//        userRepository.save(newUser);
-//    }
-//
-//}
+package com.example.kits.groupa.budgetmaster.services;
+
+import com.example.kits.groupa.budgetmaster.entities.PasswordResetToken;
+import com.example.kits.groupa.budgetmaster.entities.User;
+import com.example.kits.groupa.budgetmaster.entities.enumeration.UserStatus;
+import com.example.kits.groupa.budgetmaster.exception.NotFoundException;
+import com.example.kits.groupa.budgetmaster.payload.request.UpdatePasswordRequest;
+import com.example.kits.groupa.budgetmaster.payload.request.UpdateUserDto;
+import com.example.kits.groupa.budgetmaster.payload.response.UserInfo;
+import com.example.kits.groupa.budgetmaster.repositories.PasswordResetTokenRepository;
+import com.example.kits.groupa.budgetmaster.repositories.UserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+public class UserService {
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+
+    private final JavaMailSender mailSender;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PasswordResetTokenRepository passwordResetTokenRepository, JavaMailSender mailSender){
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.mailSender = mailSender;
+    }
+
+    public UserInfo getUserInfo(Long userId){
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            return new UserInfo(user.getName(), user.getUsername(), user.getEmail(), user.getImage(), user.getCurrency());
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
+        }
+    }
+
+    @Transactional
+    public void updateUser(Long userId, UpdateUserDto updateUserDto) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            // Update the relevant properties from the DTO
+            if (updateUserDto.getName() != null)
+                user.setName(updateUserDto.getName());
+            if (updateUserDto.getUsername() != null)
+                user.setUsername(updateUserDto.getUsername());
+            if (updateUserDto.getCurrency() != null)
+                user.setCurrency(updateUserDto.getCurrency());
+
+            // Save the updated user to the database
+            userRepository.save(user);
+
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
+        }
+    }
+
+    @Transactional
+    public void updatePassword(Long userId, UpdatePasswordRequest request) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            String currentPassword = request.getCurrentPassword();
+            String newPassword = request.getNewPassword();
+            String confirmPassword = request.getConfirmPassword();
+
+            // Check if the current password matches the user's existing password
+            if (passwordEncoder.matches(currentPassword, user.getPassword())) {
+                // Check if the new password and confirm password match
+                if (newPassword.equals(confirmPassword)) {
+                    // Set the user's new password
+                    user.setPassword(passwordEncoder.encode(newPassword));
+                    userRepository.save(user);
+                } else {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password and confirm password do not match");
+                }
+            } else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid current password");
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
+        }
+    }
+
+    public void createPasswordResetToken(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new NotFoundException("User not found with email: " + email);
+        }
+
+        // Generate a unique token
+        String token = UUID.randomUUID().toString();
+
+        // Create and save the password reset token
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setToken(token);
+        resetToken.setUser(user);
+        resetToken.setExpiryDate(LocalDateTime.now().plusHours(24)); // Set the expiry date/time
+        passwordResetTokenRepository.save(resetToken);
+
+        // Send the token to the user via email
+        sendPasswordResetEmail(user.getEmail(), token);
+    }
+
+    public void resetPassword(String token, String newPassword) {
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token);
+        if (resetToken == null || resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new NotFoundException("Invalid or expired token");
+        }
+
+        User user = resetToken.getUser();
+        // Update the user's password with the new password
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        // Save the updated user
+        userRepository.save(user);
+
+        // Delete the used password reset token
+        passwordResetTokenRepository.delete(resetToken);
+
+        sendPasswordResetNotificationEmail(user.getEmail());
+    }
+
+    private void sendPasswordResetEmail(String email, String token) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Password Reset Request");
+        message.setText("To reset your password, please click on the following link: "
+                + "http://localhost:8080/reset-password?token=" + token);
+
+        mailSender.send(message);
+    }
+
+    private void sendPasswordResetNotificationEmail(String email) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Password Reset Successful");
+        message.setText("Your password has been successfully reset.");
+
+        mailSender.send(message);
+    }
+
+    public void deactivateUser(Long userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setUserStatus(UserStatus.DISABLED);
+            userRepository.save(user);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
+        }
+    }
+}
