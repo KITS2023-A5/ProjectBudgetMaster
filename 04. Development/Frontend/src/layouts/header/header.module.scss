@@ -1,0 +1,166 @@
+@import "../../index.scss";
+
+.header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 6.5rem;
+  background: #f0f3fa;
+  box-shadow: 0 0.2rem 4rem 0 hsl(0deg 0% 6% / 5%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 3;
+
+  // @include responsive(xs) {
+  //   height: 5.6rem;
+  // }
+
+  // @include responsive(sm) {
+  //   height: 5.6rem;
+  // }
+
+  // @include responsive(md) {
+  //   height: 5.6rem;
+  // }
+
+  // @include responsive(lg) {
+  //   height: 5.6rem;
+  // }
+}
+
+.header__container {
+  padding: 0 2.4rem;
+  height: 75%;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  @include responsive(xs) {
+    padding: 0 1.6rem;
+  }
+
+  @include responsive(sm) {
+    padding: 0 2.4rem;
+  }
+
+  @include responsive(md) {
+    padding: 0 2.4rem;
+  }
+
+  @include responsive(lg) {
+    padding: 0 2.4rem;
+  }
+}
+
+.header__collapsed--btn {
+  font-size: 2.8rem;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header__auth {
+  display: flex;
+
+  &.hide {
+    display: none;
+  }
+}
+
+.header__button {
+  min-width: 6.4rem;
+  margin-left: 1rem;
+  color: #fff;
+  background-color: $primaryColor;
+  border-radius: 1rem;
+  text-align: center;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1.7;
+  padding: 0.6rem 0.8rem;
+  transition: ease 0.5s;
+
+  &:hover {
+    opacity: 0.8;
+    transform: translateY(-0.4rem);
+  }
+
+  @include responsive(xs) {
+    font-size: 1.2rem;
+    padding: 0.4rem 1.2rem;
+  }
+
+  @include responsive(sm) {
+    font-size: 1.2rem;
+    padding: 0.4rem 1.2rem;
+  }
+
+  @include responsive(md) {
+    font-size: 1.2rem;
+    padding: 0.4rem 1.2rem;
+  }
+
+  @include responsive(lg) {
+    font-size: 1.2rem;
+    padding: 0.4rem 1.2rem;
+  }
+}
+
+.header__btn--link {
+  color: #fff;
+
+  &.hide {
+    @include responsive(xs) {
+      display: none;
+    }
+  }
+}
+
+.header__avatar--btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background-color: transparent;
+}
+
+.header__avatar {
+  height: 100%;
+  border: #dbdbdb 0.05rem solid;
+}
+
+.header__avatar--name {
+  margin-left: 0.8rem;
+  margin-right: 0.8rem;
+  font-weight: 400;
+
+  @include responsive(xs) {
+    display: none;
+  }
+
+  @include responsive(sm) {
+    display: none;
+  }
+
+  @include responsive(md) {
+    display: none;
+  }
+}
+
+.profile__avatar--icon {
+  @include responsive(xs) {
+    display: none;
+  }
+
+  @include responsive(sm) {
+    display: none;
+  }
+
+  @include responsive(md) {
+    display: none;
+  }
+}

@@ -1,7 +1,16 @@
 import classNames from "classnames/bind";
 import styles from "./signup.module.scss";
 import FormComponent from "../../components/form";
-import { Button, Col, DatePicker, Form, Input, Row, Select } from "antd";
+import {
+  Button,
+  Checkbox,
+  Col,
+  DatePicker,
+  Form,
+  Input,
+  Row,
+  Select,
+} from "antd";
 import {
   FaCalendarDays,
   FaEnvelope,
@@ -12,7 +21,7 @@ import {
   FaUserPlus,
 } from "react-icons/fa6";
 import { GENDERS } from "../../constants";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   EmailRegExp,
@@ -24,9 +33,18 @@ import {
 const cx = classNames.bind(styles);
 
 const SignupPage = () => {
+  const [formSignup] = Form.useForm();
+
+  const [agreementChecked, setAgreementChecked] = useState(false);
+
   useEffect(() => {
     document.title = "Sign up";
   }, []);
+
+  const onFinish = (values) => {
+    // TODO: api signup hear
+    console.log("Received values of form: ", values);
+  };
 
   return (
     <>
@@ -36,19 +54,13 @@ const SignupPage = () => {
           <FormComponent
             name="register"
             className={cx("register__form")}
-            onFinish={() => {}}
+            onFinish={onFinish}
+            form={formSignup}
           >
             <Row gutter={16}>
-              <Col
-                className="gutter-row"
-                xl={12}
-                lg={12}
-                md={12}
-                sm={12}
-                xs={24}
-              >
+              <Col xl={12} lg={12} md={12} sm={12} xs={24}>
                 <Form.Item
-                  name="account"
+                  name="username"
                   rules={[
                     {
                       required: true,
@@ -80,14 +92,7 @@ const SignupPage = () => {
                 </Form.Item>
               </Col>
 
-              <Col
-                className="gutter-row"
-                xl={12}
-                lg={12}
-                md={12}
-                sm={12}
-                xs={24}
-              >
+              <Col xl={12} lg={12} md={12} sm={12} xs={24}>
                 <Form.Item
                   name="email"
                   rules={[
@@ -115,14 +120,7 @@ const SignupPage = () => {
                 </Form.Item>
               </Col>
 
-              <Col
-                className="gutter-row"
-                xl={12}
-                lg={12}
-                md={12}
-                sm={12}
-                xs={24}
-              >
+              <Col xl={12} lg={12} md={12} sm={12} xs={24}>
                 <Form.Item
                   name="name"
                   rules={[
@@ -145,14 +143,7 @@ const SignupPage = () => {
                 </Form.Item>
               </Col>
 
-              <Col
-                className="gutter-row"
-                xl={12}
-                lg={12}
-                md={12}
-                sm={12}
-                xs={24}
-              >
+              <Col xl={12} lg={12} md={12} sm={12} xs={24}>
                 <Form.Item
                   name="phoneNumber"
                   rules={[
@@ -180,14 +171,7 @@ const SignupPage = () => {
                 </Form.Item>
               </Col>
 
-              <Col
-                className="gutter-row"
-                xl={12}
-                lg={12}
-                md={12}
-                sm={12}
-                xs={24}
-              >
+              <Col xl={12} lg={12} md={12} sm={12} xs={24}>
                 <Form.Item
                   name="gender"
                   rules={[
@@ -235,14 +219,7 @@ const SignupPage = () => {
                 </Form.Item>
               </Col>
 
-              <Col
-                className="gutter-row"
-                xl={12}
-                lg={12}
-                md={12}
-                sm={12}
-                xs={24}
-              >
+              <Col xl={12} lg={12} md={12} sm={12} xs={24}>
                 <Form.Item
                   name="birth"
                   rules={[
@@ -263,24 +240,13 @@ const SignupPage = () => {
                 </Form.Item>
               </Col>
 
-              <Col
-                className="gutter-row"
-                xl={12}
-                lg={12}
-                md={12}
-                sm={12}
-                xs={24}
-              >
+              <Col xl={12} lg={12} md={12} sm={12} xs={24}>
                 <Form.Item
                   name="password"
                   rules={[
                     {
                       required: true,
                       message: "Please enter this field!",
-                    },
-                    {
-                      message:
-                        "The password must be at least 8 characters long",
                     },
                     {
                       min: 8,
@@ -304,14 +270,7 @@ const SignupPage = () => {
                 </Form.Item>
               </Col>
 
-              <Col
-                className="gutter-row"
-                xl={12}
-                lg={12}
-                md={12}
-                sm={12}
-                xs={24}
-              >
+              <Col xl={12} lg={12} md={12} sm={12} xs={24}>
                 <Form.Item
                   name="confirm"
                   dependencies={["password"]}
@@ -346,26 +305,44 @@ const SignupPage = () => {
                 </Form.Item>
               </Col>
 
-              <Col className="gutter-row" span={24}>
-                <Form.Item>
+              <Col span={24}>
+                <Form.Item name="agreement" valuePropName="checked">
+                  <Checkbox
+                    onChange={(e) => setAgreementChecked(e.target.checked)}
+                  >
+                    I have read the{" "}
+                    <Link
+                      to="/privacy"
+                      className={cx("register__toprivacylink")}
+                    >
+                      agreement
+                    </Link>
+                  </Checkbox>
+                </Form.Item>
+              </Col>
+
+              <Col span={24}>
+                <Form.Item style={{ marginBottom: "0rem" }}>
                   <Button
                     type="primary"
                     htmlType="submit"
                     className={cx("register-form-button")}
+                    disabled={!agreementChecked}
                     // loading={loading}
                   >
                     Sign up
                   </Button>
-                  <div className={cx("register__or")}>
-                    <span className={cx("register__ortext")}>OR</span>
-                  </div>
-                  <div className={cx("register__tologin")}>
-                    Do you already have an account?{" "}
-                    <Link to="/login" className={cx("register__tologinlink")}>
-                      Login now!
-                    </Link>
-                  </div>
                 </Form.Item>
+
+                <div className={cx("register__or")}>
+                  <span className={cx("register__ortext")}>OR</span>
+                </div>
+                <div className={cx("register__tologin")}>
+                  Do you already have an account?{" "}
+                  <Link to="/login" className={cx("register__tologinlink")}>
+                    Login now!
+                  </Link>
+                </div>
               </Col>
             </Row>
           </FormComponent>

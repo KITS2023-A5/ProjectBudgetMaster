@@ -1,0 +1,37 @@
+@import "../../index.scss";
+
+.menuItems {
+  background-color: transparent;
+  z-index: 2 !important;
+  position: relative;
+}
+
+.menu__icon {
+  font-size: 2rem !important;
+  margin-right: 1rem !important;
+}
+
+.menuItems__item {
+  height: 5rem !important;
+  margin: 1rem 0 0 1rem !important;
+  width: calc(100% - 2rem) !important;
+  border-radius: 0.4rem !important;
+  line-height: 5rem !important;
+  color: $whiteColor !important;
+
+  &:hover {
+    background-color: rgba(200, 200, 200, 0.2) !important;
+  }
+}
+
+:global(.ant-menu-item-selected) {
+  background-color: $primaryColor !important;
+
+  &:hover {
+    background-color: $primaryColor !important;
+  }
+}
+
+.menuItems__item--collapsed {
+  padding-inline: calc(50% - 2rem) !important;
+}
