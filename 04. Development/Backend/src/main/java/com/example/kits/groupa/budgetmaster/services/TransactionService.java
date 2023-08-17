@@ -5,6 +5,7 @@ import com.example.kits.groupa.budgetmaster.entities.Transaction;
 import com.example.kits.groupa.budgetmaster.entities.User;
 import com.example.kits.groupa.budgetmaster.entities.enumeration.Type;
 import com.example.kits.groupa.budgetmaster.payload.request.TransactionRequest;
+import com.example.kits.groupa.budgetmaster.payload.request.TransactionUpdateRequest;
 import com.example.kits.groupa.budgetmaster.payload.response.TransactionInfo;
 import com.example.kits.groupa.budgetmaster.repositories.CategoryRepository;
 import com.example.kits.groupa.budgetmaster.repositories.TransactionRepository;
@@ -14,10 +15,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.Deflater;
 
 @Service
@@ -49,19 +52,48 @@ public class TransactionService {
         User user = userRepository.findById(userId).orElse(null);
         transaction.setUser(user);
 
-//        try {
-//            if (receiptFile != null && !receiptFile.isEmpty()) {
-//                byte[] receiptBytes = receiptFile.getBytes();
-//                transaction.setReceipt(receiptBytes);
-//            }
-//        } catch (IOException e) {
-//
-//        }
+        try {
+            if (receiptFile != null && !receiptFile.isEmpty()) {
+                byte[] receiptBytes = receiptFile.getBytes();
+                transaction.setReceipt(receiptBytes);
+            }
+        } catch (IOException e) {
+
+        }
+        String fileName = receiptFile.getOriginalFilename();
+        String uploadDir = "/file/upload"; // Specify the directory where you want to save the files
+        String filePath = uploadDir + "/" + fileName;
+        File file = new File(filePath);
+        receiptFile.transferTo(file);
         return transactionRepository.save(transaction);
     }
 
     public List<Transaction> getTransactionsByType(Type type, Long userId) {
         return transactionRepository.findAllByType(type, userId);
+    }
+
+    public List<Transaction> getTransactionsByCategoryName(String category, Long userId) {
+        return transactionRepository.findAllByCategoryName(category, userId);
+    }
+
+    public List<Transaction> getTransactionsByCategory(int categoryId, Long userId) {
+        return transactionRepository.findAllByCategory(categoryId, userId);
+    }
+
+    public Transaction updateTransaction(Long userId, int transactionId, TransactionUpdateRequest request) {
+        Optional<Transaction> optionalTransaction = transactionRepository.findById(transactionId);
+        User user = userRepository.findById(userId).orElse(null);
+        if (optionalTransaction.isPresent() && optionalTransaction.get().getUser().equals(user)) {
+            Transaction transaction = optionalTransaction.get();
+            transaction.setAmount(request.getAmount());
+            transaction.setDescription(request.getDescription());
+            transaction.setReceipt(request.getReceipt());
+            transaction.setType(request.getType());
+            transaction.setUpdatedTime(LocalDateTime.now());
+            return transactionRepository.save(transaction);
+        } else {
+            return null;
+        }
     }
 
     public void deleteTransaction(Long userId, int transactionId) {

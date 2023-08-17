@@ -2,6 +2,7 @@ package com.example.kits.groupa.budgetmaster.services;
 
 import com.example.kits.groupa.budgetmaster.entities.PasswordResetToken;
 import com.example.kits.groupa.budgetmaster.entities.User;
+import com.example.kits.groupa.budgetmaster.entities.enumeration.UserStatus;
 import com.example.kits.groupa.budgetmaster.exception.NotFoundException;
 import com.example.kits.groupa.budgetmaster.payload.request.UpdatePasswordRequest;
 import com.example.kits.groupa.budgetmaster.payload.request.UpdateUserDto;
@@ -152,5 +153,16 @@ public class UserService {
         message.setText("Your password has been successfully reset.");
 
         mailSender.send(message);
+    }
+
+    public void deactivateUser(Long userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setUserStatus(UserStatus.DISABLED);
+            userRepository.save(user);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
+        }
     }
 }

@@ -24,4 +24,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
 
     @Query("SELECT t FROM Transaction t WHERE t.type = :type and t.user.userId = :userId")
     List<Transaction> findAllByType(@Param("type") Type type, @Param("userId") Long userId);
+
+    @Query("SELECT t FROM Transaction t WHERE t.category.name LIKE %:category% and t.user.userId = :userId")
+    List<Transaction> findAllByCategoryName(@Param("category") String category, @Param("userId") Long userId);
+
+    @Query("SELECT t FROM Transaction t WHERE t.category.categoryId = :categoryId and t.user.userId = :userId")
+    List<Transaction> findAllByCategory(@Param("categoryId") int categoryId, @Param("userId") Long userId);
 }

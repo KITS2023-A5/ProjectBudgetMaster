@@ -31,7 +31,7 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     public ResponseEntity<String> updateProfile(@RequestHeader("Authorization") String authorizationHeader,
                                                 @RequestBody UpdateUserDto userProfileDto) {
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
@@ -63,5 +63,13 @@ public class UserController {
     public ResponseEntity<String> resetPassword(@RequestParam("token") String token, @RequestParam("newPassword") String newPassword) {
         userService.resetPassword(token, newPassword);
         return ResponseEntity.ok("Password has been successfully reset.");
+    }
+
+    @PostMapping("/deactivate")
+    public ResponseEntity<String> deactivateUser(@RequestHeader("Authorization") String authorizationHeader) {
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+        Long userId = jwtUtils.getUserIdFromJwtToken(token);
+        userService.deactivateUser(userId);
+        return ResponseEntity.ok("User deactivated successfully");
     }
 }
