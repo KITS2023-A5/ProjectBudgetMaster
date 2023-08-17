@@ -4,32 +4,34 @@
   position: sticky;
   top: 0;
   width: 100%;
-  height: 6rem;
+  height: 6.5rem;
   background: #f0f3fa;
   box-shadow: 0 0.2rem 4rem 0 hsl(0deg 0% 6% / 5%);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  z-index: 3;
 
-  @include responsive(xs) {
-    height: 5.6rem;
-  }
+  // @include responsive(xs) {
+  //   height: 5.6rem;
+  // }
 
-  @include responsive(sm) {
-    height: 5.6rem;
-  }
+  // @include responsive(sm) {
+  //   height: 5.6rem;
+  // }
 
-  @include responsive(md) {
-    height: 5.6rem;
-  }
+  // @include responsive(md) {
+  //   height: 5.6rem;
+  // }
 
-  @include responsive(lg) {
-    height: 5.6rem;
-  }
+  // @include responsive(lg) {
+  //   height: 5.6rem;
+  // }
 }
 
 .header__container {
   padding: 0 2.4rem;
+  height: 75%;
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -53,9 +55,11 @@
 }
 
 .header__collapsed--btn {
-  font-size: 2.4rem;
+  font-size: 2.8rem;
   height: 100%;
-  padding: 0 0.8rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .header__auth {
@@ -113,5 +117,50 @@
     @include responsive(xs) {
       display: none;
     }
+  }
+}
+
+.header__avatar--btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background-color: transparent;
+}
+
+.header__avatar {
+  height: 100%;
+  border: #dbdbdb 0.05rem solid;
+}
+
+.header__avatar--name {
+  margin-left: 0.8rem;
+  margin-right: 0.8rem;
+  font-weight: 400;
+
+  @include responsive(xs) {
+    display: none;
+  }
+
+  @include responsive(sm) {
+    display: none;
+  }
+
+  @include responsive(md) {
+    display: none;
+  }
+}
+
+.profile__avatar--icon {
+  @include responsive(xs) {
+    display: none;
+  }
+
+  @include responsive(sm) {
+    display: none;
+  }
+
+  @include responsive(md) {
+    display: none;
   }
 }

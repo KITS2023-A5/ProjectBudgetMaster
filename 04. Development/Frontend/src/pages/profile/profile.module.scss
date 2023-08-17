@@ -1,5 +1,231 @@
 @import "../../index.scss";
 
-.title {
+.profilepage__wrapper {
+  padding: 4rem;
+}
+
+.profilepage__title {
   color: $textColor;
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+}
+
+.profilepage__content {
+  padding: 6rem 4rem;
+  background-color: #fff;
+  border-radius: 1.5rem;
+  margin-bottom: 2rem;
+
+  @include responsive(xs) {
+    padding: 5rem 2rem;
+  }
+}
+
+.profile__row {
+  justify-content: center;
+}
+
+.profile__avatar {
+  display: flex;
+  justify-content: center;
+}
+
+.profile__img {
+  width: 20rem;
+  height: 20rem;
+  position: relative;
+  cursor: pointer;
+  border-radius: 50%;
+
+  @include responsive(xs) {
+    width: 15rem;
+    height: 15rem;
+  }
+
+  @include responsive(sm) {
+    width: 16rem;
+    height: 16rem;
+  }
+
+  @include responsive(md) {
+    width: 18rem;
+    height: 18rem;
+  }
+}
+
+.profile__upload--icon {
+  position: absolute;
+  font-size: 3rem;
+  color: #fff;
+  opacity: 0;
+  transform: translate(0%, 275%);
+  transition: ease-in-out 0.3s all;
+
+  @include responsive(xs) {
+    transform: translate(0%, 200%);
+  }
+
+  @include responsive(sm) {
+    transform: translate(0%, 200%);
+  }
+
+  &:hover {
+    opacity: 1;
+    cursor: pointer;
+  }
+}
+
+.profile__avatar--upload {
+  &:hover ~ .profile__upload--icon {
+    opacity: 1;
+  }
+}
+
+.profile__username {
+  text-align: center;
+  margin: 2rem;
+  font-weight: 500;
+  font-size: 1.8rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+
+  @include responsive(xs) {
+    margin: 1rem 0 2rem;
+  }
+}
+
+.profile__groupbtn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile__button {
+  -webkit-box-align: center;
+  -webkit-box-pack: center;
+  -webkit-tap-highlight-color: transparent;
+  width: 100%;
+  position: relative;
+  box-sizing: border-box;
+  cursor: pointer;
+  user-select: none;
+  vertical-align: middle;
+  appearance: none;
+  text-transform: unset;
+  font-weight: 500;
+  font-size: 1.4rem;
+  min-width: 6rem;
+  border-radius: 10rem;
+  border: 0.1rem solid rgb(213, 221, 231);
+  padding: 1.2rem 1.6rem;
+  margin: 2rem 0.8rem 0rem;
+  transition: ease 0.5s;
+
+  &.danger {
+    background-color: #e65046;
+    color: $whiteColor;
+  }
+
+  &:hover {
+    transform: translateY(-0.4rem);
+  }
+}
+
+.profile__button--row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile__button--icon {
+  font-size: 2rem;
+}
+
+.profile__info--row {
+  height: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 3rem 0 0;
+
+  @include responsive(xs) {
+    padding: 0;
+    justify-content: center;
+  }
+
+  @include responsive(sm) {
+    padding: 0;
+    justify-content: center;
+  }
+
+  @include responsive(md) {
+    justify-content: center;
+  }
+}
+
+.profile__info {
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  background: #f9f9f9;
+  color: $textColor;
+  height: 5.6rem;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  position: relative;
+  margin: 1rem 0;
+
+  &::before {
+    min-width: 6.4rem;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    background: transparent;
+    box-sizing: border-box;
+    z-index: 0;
+    content: "";
+    border-top: 6rem solid #bbbbbb;
+    border-right: 1rem solid transparent;
+  }
+}
+
+.profile__info--iconwrap {
+  background: transparent;
+  min-width: 6rem;
+  padding: 0 1.2rem;
+  display: flex;
+  -webkit-box-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  justify-content: center;
+  margin-right: 1.2rem;
+}
+
+.profile__info--icon {
+  font-size: 2rem;
+  color: $textColor;
+  position: relative;
+}
+
+.profile__info--value {
+  font-weight: 500;
+}
+
+.line {
+  height: 0.1rem;
+  content: "";
+  background: rgb(123, 123, 123);
+  margin: 2rem 0.8rem;
+  display: none;
+
+  @include responsive(xs) {
+    display: block;
+  }
+
+  @include responsive(sm) {
+    display: block;
+  }
 }

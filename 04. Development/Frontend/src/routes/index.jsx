@@ -11,8 +11,9 @@ export const publicRoutes = [
   { path: "/login", component: LoginPage },
   { path: "/signup", component: SignupPage },
   { path: "/resetPassword", component: ResetPasswordPage },
+  { path: "/profile", component: ProfilePage },
   { path: "*", component: NotFoundPage },
 ];
 
 // Private routes
-export const privateRoutes = [{ path: "/profile", component: ProfilePage }];
+// export const privateRoutes = [{ path: "/profile", component: ProfilePage }];
