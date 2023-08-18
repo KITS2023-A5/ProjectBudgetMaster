@@ -97,6 +97,9 @@ public class TransactionService {
         }
     }
 
+    public List<TransactionProjection> getTransactionsBetweenDates(LocalDateTime startDate, LocalDateTime endDate, Long userId) {
+        return transactionRepository.findAllBetweenDates(startDate, endDate, userId);
+    }
 //    public void deleteTransaction(Long userId, int transactionId) {
 //        Transaction existingTransaction = transactionRepository.findByTransactionIdAndUserId(transactionId, userId);
 //        if (existingTransaction != null) {

@@ -32,4 +32,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
 
     @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, t.updatedTime AS updatedTime, t.receipt AS receipt, t.type AS type FROM Transaction t WHERE t.category.categoryId = :categoryId AND t.user.userId = :userId")
     List<TransactionProjection> findAllByCategory(@Param("categoryId") int categoryId, @Param("userId") Long userId);
+
+    @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, t.updatedTime AS updatedTime, t.receipt AS receipt, t.type AS type FROM Transaction t WHERE t.user.userId = :userId AND t.createdTime BETWEEN :start AND :end")
+    List<TransactionProjection> findAllBetweenDates(LocalDateTime start, LocalDateTime end, Long userId);
 }

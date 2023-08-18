@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -98,6 +100,18 @@ public class TransactionController {
             return ResponseEntity.ok(updatedTransaction);
         } else {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/dates")
+    public ResponseEntity<List<TransactionProjection>> getTransactionByDate(@RequestHeader("Authorization") String authorizationHeader, @RequestParam LocalDateTime startDate, @RequestParam LocalDateTime endDate){
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+        Long userId = jwtUtils.getUserIdFromJwtToken(token);
+        List<TransactionProjection> transaction = transactionService.getTransactionsBetweenDates(startDate, endDate, userId);
+        if (transaction != null) {
+            return new ResponseEntity<>(transaction, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
