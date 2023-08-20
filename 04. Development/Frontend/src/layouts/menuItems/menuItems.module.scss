@@ -34,4 +34,8 @@
 
 .menuItems__item--collapsed {
   padding-inline: calc(50% - 2rem) !important;
+
+  & > span {
+    overflow: unset !important;
+  }
 }

@@ -54,3 +54,25 @@
   vertical-align: middle;
   object-fit: contain;
 }
+
+.sidebar__drawer {
+  background-color: transparent !important;
+  background-size: cover !important;
+  background-position: center !important;
+  color: $whiteColor !important;
+
+  &::before {
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    content: "" !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
+    display: block !important;
+    position: absolute !important;
+    opacity: 0.8 !important;
+    background: #000 !important;
+  }
+}

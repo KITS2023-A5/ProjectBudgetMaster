@@ -33,6 +33,11 @@ const Sidebar = () => {
     setCurrentPath(e.key);
   };
 
+  const handleClickMenuItemDrawer = (e) => {
+    setCurrentPath(e.key);
+    dispatch(toggleCollapsed());
+  };
+
   return (
     <>
       {windownSize.width > 992 ? (
@@ -42,7 +47,7 @@ const Sidebar = () => {
           collapsed={collapsed}
           onCollapse={handleCollapseToggle}
           width={260}
-          theme="light"
+          // theme="light"
           style={{
             backgroundImage: `url(${bgImg4})`,
           }}
@@ -64,9 +69,16 @@ const Sidebar = () => {
           placement={"left"}
           onClose={handleDrawerToggle}
           open={collapsed}
+          style={{
+            backgroundImage: `url(${bgImg4})`,
+          }}
+          headerStyle={{ display: "none" }}
           className={cx("sidebar__drawer")}
         >
-          <MenuItems onClick={handleClickMenuItem} currentPath={currentPath} />
+          <MenuItems
+            onClick={handleClickMenuItemDrawer}
+            currentPath={currentPath}
+          />
         </Drawer>
       )}
     </>
