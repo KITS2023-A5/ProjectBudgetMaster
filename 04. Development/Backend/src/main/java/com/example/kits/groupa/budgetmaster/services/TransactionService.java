@@ -55,19 +55,19 @@ public class TransactionService {
         User user = userRepository.findById(userId).orElse(null);
         transaction.setUser(user);
         transaction.setVisible(true);
-        try {
-            if (receiptFile != null && !receiptFile.isEmpty()) {
-                byte[] receiptBytes = receiptFile.getBytes();
-                transaction.setReceipt(receiptBytes);
-            }
-        } catch (IOException e) {
-
-        }
-        String fileName = receiptFile.getOriginalFilename();
-        String uploadDir = "/file/upload"; // Specify the directory where you want to save the files
-        String filePath = uploadDir + "/" + fileName;
-        File file = new File(filePath);
-        receiptFile.transferTo(file);
+//        try {
+//            if (receiptFile != null && !receiptFile.isEmpty()) {
+//                byte[] receiptBytes = receiptFile.getBytes();
+//                transaction.setReceipt(receiptBytes);
+//            }
+//        } catch (IOException e) {
+//
+//        }
+//        String fileName = receiptFile.getOriginalFilename();
+//        String uploadDir = "/file/upload"; // Specify the directory where you want to save the files
+//        String filePath = uploadDir + "/" + fileName;
+//        File file = new File(filePath);
+//        receiptFile.transferTo(file);
         return transactionRepository.save(transaction);
     }
 
@@ -149,5 +149,39 @@ public class TransactionService {
         }
 
         return expenseStatisticsList;
+    }
+
+    public List<Double> getSavingsPrediction(Long userId, int futurePeriods) {
+        List<Double> amounts = new ArrayList<>();
+        List<TransactionProjection> transactions = transactionRepository.findByUserId(userId);
+        for (TransactionProjection transaction : transactions) {
+            if (transaction.getType() == Type.EXPENSE) {
+                amounts.add(transaction.getAmount() * -1);
+            } else {
+                amounts.add(transaction.getAmount());
+            }
+        }
+
+        List<Double> predictedAmounts = new ArrayList<>();
+        int n = amounts.size();
+        int windowSize = (int) Math.ceil(n * 0.6); // Adjusted windowSize calculation
+
+        for (int i = n; i < n + futurePeriods; i++) {
+            int startIndex = Math.max(0, i - windowSize);
+            int endIndex = Math.min(i, n); // Adjusted endIndex calculation
+            List<Double> window = amounts.subList(startIndex, endIndex);
+            double average = calculateAverage(window);
+            predictedAmounts.add(average);
+        }
+
+        return predictedAmounts;
+    }
+
+    private double calculateAverage(List<Double> values) {
+        double sum = 0.0;
+        for (double value : values) {
+            sum += value;
+        }
+        return sum / values.size();
     }
 }

@@ -62,7 +62,8 @@ public class WebSecurityConfig {
                         auth.requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/test/**").permitAll()
                                 .requestMatchers("/**").permitAll()
-                                .requestMatchers("/api/admin/**").hasAuthority(String.valueOf("ROLE_USER"))
+                                .requestMatchers("/api/user/**").hasAuthority(String.valueOf("ROLE_USER"))
+                                .requestMatchers("/api/admin/**").hasAuthority(String.valueOf("ROLE_ADMIN"))
                                 .anyRequest().authenticated()
 
                 );

@@ -156,6 +156,14 @@ public class TransactionController {
         List<ExpenseStatistics> statistics = transactionService.getExpenseLastXDays(userId, X);
         return new ResponseEntity<>(statistics, HttpStatus.OK);
     }
+
+    @GetMapping("/saving-predictions")
+    public ResponseEntity<List<Double>> getSavingPredictions(@RequestHeader("Authorization") String authorizationHeader, @RequestParam Integer period){
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+        Long userId = jwtUtils.getUserIdFromJwtToken(token);
+        List<Double> predictions = transactionService.getSavingsPrediction(userId, period);
+        return new ResponseEntity<>(predictions, HttpStatus.OK);
+    }
 //    @DeleteMapping("/{transactionId}")
 //    public ResponseEntity<Void> deleteTransaction(@RequestHeader("Authorization") String authorizationHeader, @PathVariable int transactionId) {
 //        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
