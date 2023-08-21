@@ -10,16 +10,18 @@ i18n.use(initReactI18next).init({
   resources: {
     ENG: {
       translation: {
-        // Language: "Language",
-        // Search: "Search",
-        // Home: "Home",
+        Home: "Home",
+        Transaction: "Transaction",
+        Budget: "Budget",
+        Statistic: "Statistic",
       },
     },
     VIE: {
       translation: {
-        // Language: "Ngôn ngữ",
-        // Search: "Tìm kiếm",
-        // Home: "Trang chủ",
+        Home: "Trang chủ",
+        Transaction: "Giao dịch",
+        Budget: "Ngân sách",
+        Statistic: "Thống kê",
       },
     },
   },

@@ -1,21 +1,45 @@
-import classNames from "classnames/bind";
-import Footer from "../../layouts/footer";
-import Header from "../../layouts/header";
-import Sidebar from "../../layouts/sidebar";
-import styles from "./statistic.module.scss";
-import { Card, Col, Layout, Row, Statistic } from "antd";
+import { Card, Col, DatePicker, Layout, Row, Statistic } from "antd";
 import { Content } from "antd/es/layout/layout";
+import {
+  ArcElement,
+  CategoryScale,
+  Chart as ChartJS,
+  LinearScale,
+  PointElement,
+  BarElement,
+  LineElement,
+  Legend,
+  Tooltip,
+  LineController,
+  BarController,
+} from "chart.js";
+import classNames from "classnames/bind";
+import { Chart, Line, Pie } from "react-chartjs-2";
 import {
   FaMoneyBillTrendUp,
   FaPersonArrowDownToLine,
   FaPersonArrowUpFromLine,
 } from "react-icons/fa6";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-import { Pie } from "react-chartjs-2";
+import Footer from "../../layouts/footer";
+import Header from "../../layouts/header";
+import Sidebar from "../../layouts/sidebar";
+import styles from "./statistic.module.scss";
+import moment from "moment";
 
 const cx = classNames.bind(styles);
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+  PointElement,
+  BarElement,
+  LineElement,
+  Tooltip,
+  Legend,
+  LineController,
+  BarController
+);
 
 const data = {
   labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
@@ -51,6 +75,21 @@ const datasetLabel = {
   },
 };
 
+const labelStatistic = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
 const StatisticPage = () => {
   return (
     <>
@@ -67,6 +106,26 @@ const StatisticPage = () => {
 
                 <div className={cx("statisticpage__content")}>
                   <Row gutter={16}>
+                    <Col
+                      span={24}
+                      style={{
+                        display: "flex",
+                        justifyContent: "flex-start",
+                        alignItems: "center",
+                        marginBottom: "2rem",
+                      }}
+                    >
+                      <div className={cx("statistic__label")}>Time</div>
+                      <DatePicker
+                        className={cx("statistic__datepicker")}
+                        format={"MM/YYYY"}
+                        picker="month"
+                        disabledDate={(current) => {
+                          return current && current > moment().endOf("month");
+                        }}
+                      />
+                    </Col>
+
                     <Col xl={8} lg={8} md={8} sm={24} xs={24}>
                       <Card bordered={false} className={cx("statistic__card")}>
                         <Statistic
@@ -109,21 +168,73 @@ const StatisticPage = () => {
 
                   <Row gutter={16}>
                     <Col xl={12} lg={12} md={12} sm={24} xs={24}>
-                      <Pie
-                        options={{
-                          responsive: true,
-                        }}
-                        data={data}
-                      />
+                      <Card
+                        title={"Income Chart"}
+                        bordered={false}
+                        className={cx("statistic__card--chart")}
+                      >
+                        <Pie
+                          options={{
+                            responsive: true,
+                          }}
+                          data={data}
+                        />
+                      </Card>
                     </Col>
 
                     <Col xl={12} lg={12} md={12} sm={24} xs={24}>
-                      <Pie
-                        options={{
-                          responsive: true,
-                        }}
-                        data={data}
-                      />
+                      <Card
+                        title={"Expense Chart"}
+                        bordered={false}
+                        className={cx("statistic__card--chart")}
+                      >
+                        <Pie
+                          options={{
+                            responsive: true,
+                          }}
+                          data={data}
+                        />
+                      </Card>
+                    </Col>
+
+                    <Col xl={24} lg={24} md={24} sm={24} xs={24}>
+                      <Card
+                        title={"Statistic Chart"}
+                        bordered={false}
+                        className={cx("statistic__card--chart")}
+                      >
+                        <Chart
+                          type="line"
+                          data={{
+                            labels: labelStatistic,
+                            datasets: [
+                              {
+                                label: "Data 1",
+                                data: [
+                                  10, 20, 15, 25, 30, 28, 23, 30, 16, 21, 26,
+                                  23,
+                                ],
+                                fill: false,
+                                borderColor: "rgb(75, 192, 192)",
+                                backgroundColor: "rgb(75, 192, 192)",
+                                tension: 0.1,
+                              },
+                              {
+                                label: "Data 2",
+                                data: [
+                                  20, 17, 25, 16, 13, 18, 23, 23, 19, 22, 24,
+                                  26,
+                                ],
+                                fill: false,
+                                borderColor: "rgb(255, 99, 132)",
+                                backgroundColor: "rgb(255, 99, 132)",
+                                tension: 0.1,
+                              },
+                            ],
+                          }}
+                          options={{}}
+                        />
+                      </Card>
                     </Col>
                   </Row>
                 </div>
