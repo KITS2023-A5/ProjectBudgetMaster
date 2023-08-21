@@ -12,6 +12,7 @@ import com.example.kits.groupa.budgetmaster.repositories.TransactionProjection;
 import com.example.kits.groupa.budgetmaster.repositories.TransactionRepository;
 import com.example.kits.groupa.budgetmaster.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,8 +38,8 @@ public class TransactionService {
         this.userRepository = userRepository;
     }
 
-    public List<TransactionProjection> getTransactionsByUser(Long userId) {
-        return transactionRepository.findByUserId(userId);
+    public List<TransactionProjection> getTransactionsByUser(Long userId, Pageable pageable) {
+        return transactionRepository.findByUserId(userId, pageable);
     }
 
     public Transaction createTransaction(Long userId, TransactionRequest transactionRequest, MultipartFile receiptFile) throws IOException {
@@ -69,16 +70,16 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    public List<TransactionProjection> getTransactionsByType(Type type, Long userId) {
-        return transactionRepository.findAllByType(type, userId);
+    public List<TransactionProjection> getTransactionsByType(Type type, Long userId, Pageable pageable) {
+        return transactionRepository.findAllByType(type, userId, pageable);
     }
 
-    public List<TransactionProjection> getTransactionsByCategoryName(String category, Long userId) {
-        return transactionRepository.findAllByCategoryName(category, userId);
+    public List<TransactionProjection> getTransactionsByCategoryName(String category, Long userId, Pageable pageable) {
+        return transactionRepository.findAllByCategoryName(category, userId, pageable);
     }
 
-    public List<TransactionProjection> getTransactionsByCategory(int categoryId, Long userId) {
-        return transactionRepository.findAllByCategory(categoryId, userId);
+    public List<TransactionProjection> getTransactionsByCategory(int categoryId, Long userId, Pageable pageable) {
+        return transactionRepository.findAllByCategory(categoryId, userId, pageable);
     }
 
     public Transaction updateTransaction(Long userId, int transactionId, TransactionUpdateRequest request) {
@@ -97,6 +98,9 @@ public class TransactionService {
         }
     }
 
+    public List<TransactionProjection> getTransactionsBetweenDates(LocalDateTime startDate, LocalDateTime endDate, Long userId, Pageable pageable) {
+        return transactionRepository.findAllBetweenDates(startDate, endDate, userId, pageable);
+    }
 //    public void deleteTransaction(Long userId, int transactionId) {
 //        Transaction existingTransaction = transactionRepository.findByTransactionIdAndUserId(transactionId, userId);
 //        if (existingTransaction != null) {

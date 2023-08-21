@@ -10,6 +10,7 @@ import com.example.kits.groupa.budgetmaster.repositories.TransactionRepository;
 import com.example.kits.groupa.budgetmaster.security.jwt.JwtUtils;
 import com.example.kits.groupa.budgetmaster.services.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -32,10 +35,10 @@ public class TransactionController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<TransactionProjection>> getTransactionByUser(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<List<TransactionProjection>> getTransactionByUser(@RequestHeader("Authorization") String authorizationHeader, Pageable pageable){
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        List<TransactionProjection> transaction = transactionService.getTransactionsByUser(userId);
+        List<TransactionProjection> transaction = transactionService.getTransactionsByUser(userId, pageable);
         if (transaction != null) {
             return new ResponseEntity<>(transaction, HttpStatus.OK);
         } else {
@@ -44,10 +47,10 @@ public class TransactionController {
     }
 
     @GetMapping("/type/{type}")
-    public ResponseEntity<List<TransactionProjection>> getTransactionByType(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Type type) {
+    public ResponseEntity<List<TransactionProjection>> getTransactionByType(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Type type, Pageable pageable) {
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        List<TransactionProjection> transaction = transactionService.getTransactionsByType(type, userId);
+        List<TransactionProjection> transaction = transactionService.getTransactionsByType(type, userId, pageable);
         if (transaction != null) {
             return new ResponseEntity<>(transaction, HttpStatus.OK);
         } else {
@@ -56,10 +59,10 @@ public class TransactionController {
     }
 
     @GetMapping("/category")
-    public ResponseEntity<List<TransactionProjection>> getTransactionByCategoryName(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String category){
+    public ResponseEntity<List<TransactionProjection>> getTransactionByCategoryName(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String category, Pageable pageable){
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        List<TransactionProjection> transaction = transactionService.getTransactionsByCategoryName(category, userId);
+        List<TransactionProjection> transaction = transactionService.getTransactionsByCategoryName(category, userId, pageable);
         if (transaction != null) {
             return new ResponseEntity<>(transaction, HttpStatus.OK);
         } else {
@@ -68,10 +71,10 @@ public class TransactionController {
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<TransactionProjection>> getTransactionByCategory(@RequestHeader("Authorization") String authorizationHeader, @PathVariable int categoryId){
+    public ResponseEntity<List<TransactionProjection>> getTransactionByCategory(@RequestHeader("Authorization") String authorizationHeader, @PathVariable int categoryId, Pageable pageable){
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        List<TransactionProjection> transaction = transactionService.getTransactionsByCategory(categoryId, userId);
+        List<TransactionProjection> transaction = transactionService.getTransactionsByCategory(categoryId, userId, pageable);
         if (transaction != null) {
             return new ResponseEntity<>(transaction, HttpStatus.OK);
         } else {
@@ -98,6 +101,18 @@ public class TransactionController {
             return ResponseEntity.ok(updatedTransaction);
         } else {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/dates")
+    public ResponseEntity<List<TransactionProjection>> getTransactionByDate(@RequestHeader("Authorization") String authorizationHeader, @RequestParam LocalDateTime startDate, @RequestParam LocalDateTime endDate, Pageable pageable){
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+        Long userId = jwtUtils.getUserIdFromJwtToken(token);
+        List<TransactionProjection> transaction = transactionService.getTransactionsBetweenDates(startDate, endDate, userId, pageable);
+        if (transaction != null) {
+            return new ResponseEntity<>(transaction, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 

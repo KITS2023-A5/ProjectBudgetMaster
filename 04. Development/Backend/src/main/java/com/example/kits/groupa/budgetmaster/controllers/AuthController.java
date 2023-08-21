@@ -4,6 +4,7 @@ import com.example.kits.groupa.budgetmaster.entities.Role;
 import com.example.kits.groupa.budgetmaster.entities.User;
 import com.example.kits.groupa.budgetmaster.entities.enumeration.ERole;
 import com.example.kits.groupa.budgetmaster.entities.enumeration.UserStatus;
+import com.example.kits.groupa.budgetmaster.exception.UserStatusException;
 import com.example.kits.groupa.budgetmaster.payload.request.LoginRequest;
 import com.example.kits.groupa.budgetmaster.payload.request.SignupRequest;
 import com.example.kits.groupa.budgetmaster.payload.response.JwtResponse;
@@ -21,6 +22,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,10 +56,15 @@ public class AuthController {
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        User user = userRepository.findByUsernameOrEmail(loginRequest.getUsernameOrEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (!user.getUserStatus().equals(UserStatus.ACTIVE)) {
+            throw new UserStatusException("User is not active");
+        }
 
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsernameOrEmail(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String accessToken = jwtUtils.generateJwtToken(authentication);
         String refreshToken = jwtUtils.generateRefreshToken(authentication);
@@ -65,8 +72,7 @@ public class AuthController {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(new JwtResponse(accessToken,
-                refreshToken));
+        return ResponseEntity.ok(new JwtResponse(accessToken, refreshToken));
     }
 
     @PostMapping("/signup")
@@ -86,9 +92,13 @@ public class AuthController {
         // Create new user's account
         User user = new User(
                 signUpRequest.getName(),
+                encoder.encode(signUpRequest.getPassword()),
                 signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
-                encoder.encode(signUpRequest.getPassword()));
+                signUpRequest.getPhone(),
+                signUpRequest.getGender(),
+                signUpRequest.getDob()
+                );
 
         user.setUserStatus(UserStatus.DISABLED);
         String activationToken = UUID.randomUUID().toString();
