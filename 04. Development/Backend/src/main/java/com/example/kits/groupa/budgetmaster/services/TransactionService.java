@@ -46,7 +46,6 @@ public class TransactionService {
         Transaction transaction = new Transaction();
         transaction.setAmount(transactionRequest.getAmount());
         transaction.setDescription(transactionRequest.getDescription());
-        transaction.setType(transactionRequest.getType());
         transaction.setCreatedTime(LocalDateTime.now());
 
         Category category = categoryRepository.findById(transactionRequest.getCategoryId()).orElse(null);
@@ -70,9 +69,6 @@ public class TransactionService {
         return transactionRepository.save(transaction);
     }
 
-    public List<TransactionProjection> getTransactionsByType(Type type, Long userId, Pageable pageable) {
-        return transactionRepository.findAllByType(type, userId, pageable);
-    }
 
     public List<TransactionProjection> getTransactionsByCategoryName(String category, Long userId, Pageable pageable) {
         return transactionRepository.findAllByCategoryName(category, userId, pageable);
@@ -90,7 +86,8 @@ public class TransactionService {
             transaction.setAmount(request.getAmount());
             transaction.setDescription(request.getDescription());
             transaction.setReceipt(request.getReceipt());
-            transaction.setType(request.getType());
+            Category category = categoryRepository.findById(request.getCategoryId()).orElse(null);
+            transaction.setCategory(category);
             transaction.setUpdatedTime(LocalDateTime.now());
             return transactionRepository.save(transaction);
         } else {

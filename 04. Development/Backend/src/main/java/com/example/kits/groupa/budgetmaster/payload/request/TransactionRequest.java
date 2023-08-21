@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class TransactionRequest {
     private double amount;
     private String description;
-    private Type type;
     private int categoryId;
     private Long userId;
 
