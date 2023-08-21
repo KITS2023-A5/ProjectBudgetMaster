@@ -104,7 +104,7 @@ public class AuthController {
         String activationToken = UUID.randomUUID().toString();
         user.setActivationToken(activationToken);
 
-        Set<String> strRoles = signUpRequest.getRole();
+        Set<ERole> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
 
         if (strRoles == null) {
@@ -114,7 +114,7 @@ public class AuthController {
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
-                    case "admin":
+                    case ROLE_ADMIN:
                         Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
                                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(adminRole);
@@ -131,7 +131,7 @@ public class AuthController {
         user.setRoles(roles);
         userRepository.save(user);
 
-        String activationLink = "http://localhost:8080/activate?token=" + activationToken; // Replace with your activation endpoint URL
+        String activationLink = "http://45.117.179.168:8080/api/authactivate?token=" + activationToken; // Replace with your activation endpoint URL
         String emailBody = "Please click the following link to activate your account: " + activationLink;
         String emailSubject = "Account Activation";
 

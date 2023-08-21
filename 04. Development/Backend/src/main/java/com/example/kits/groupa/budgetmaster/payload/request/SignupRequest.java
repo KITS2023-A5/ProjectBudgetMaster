@@ -16,6 +16,6 @@ public class SignupRequest {
     private String phone;
     private Date dob;
     private Gender gender;
-    private Set<String> role;
+    private Set<ERole> role;
 
 }

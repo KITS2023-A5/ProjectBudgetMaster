@@ -141,7 +141,7 @@ public class UserService {
         message.setTo(email);
         message.setSubject("Password Reset Request");
         message.setText("To reset your password, please click on the following link: "
-                + "http://localhost:8080/reset-password?token=" + token);
+                + "http://45.117.179.168:8080/api/user/reset-password?token=" + token);
 
         mailSender.send(message);
     }
