@@ -8,12 +8,14 @@ import {
 } from "react-icons/fa6";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import styles from "./menuItems.module.scss";
 
 const cx = classNames.bind(styles);
 
 const MenuItems = ({ onClick, currentPath }) => {
   const collapsed = useSelector((state) => state.collapsed);
+  const { t } = useTranslation();
 
   const items = [
     {
@@ -21,7 +23,7 @@ const MenuItems = ({ onClick, currentPath }) => {
       icon: <FaHouseChimney className={cx("menu__icon")} />,
       label: (
         <Link to={"/"} className={cx("menuItems__link")}>
-          Home
+          {t("Home")}
         </Link>
       ),
       className: cx("menuItems__item", {
@@ -33,7 +35,7 @@ const MenuItems = ({ onClick, currentPath }) => {
       icon: <FaMoneyBillTransfer className={cx("menu__icon")} />,
       label: (
         <Link to={"/transaction"} className={cx("menuItems__link")}>
-          Transaction
+          {t("Transaction")}
         </Link>
       ),
       className: cx("menuItems__item", {
@@ -45,7 +47,7 @@ const MenuItems = ({ onClick, currentPath }) => {
       icon: <FaPiggyBank className={cx("menu__icon")} />,
       label: (
         <Link to={"/budget"} className={cx("menuItems__link")}>
-          Budget
+          {t("Budget")}
         </Link>
       ),
       className: cx("menuItems__item", {
@@ -57,7 +59,7 @@ const MenuItems = ({ onClick, currentPath }) => {
       icon: <FaChartColumn className={cx("menu__icon")} />,
       label: (
         <Link to={"/statistic"} className={cx("menuItems__link")}>
-          Statistic
+          {t("Statistic")}
         </Link>
       ),
       className: cx("menuItems__item", {
