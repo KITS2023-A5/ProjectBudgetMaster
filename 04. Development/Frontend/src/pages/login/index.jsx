@@ -2,7 +2,7 @@ import classNames from "classnames/bind";
 import styles from "./login.module.scss";
 import { Button, Checkbox, Form, Input } from "antd";
 import FormComponent from "../../components/form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaLock, FaUserLarge } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
 import { useEffect } from "react";
@@ -10,9 +10,23 @@ import { useEffect } from "react";
 const cx = classNames.bind(styles);
 
 const LoginPage = () => {
+  const navigator = useNavigate();
   useEffect(() => {
     document.title = "Login";
   }, []);
+
+  // handleLogin = async (data) => {
+  //   try {
+  //     const { username, password } = data;
+
+  //     const res = await axios.post("/api/v1/signin", { username, password });
+  //     const accessToken = res.data.accessToken;
+
+  //     navigator("/");
+  //   } catch (error) {
+  //     console.log("err" + error);
+  //   }
+  // };
 
   return (
     <>
@@ -25,7 +39,7 @@ const LoginPage = () => {
             initialValues={{
               remember: true,
             }}
-            onFinish={() => {}}
+            // onFinish={handleLogin}
           >
             <Form.Item
               name="account"

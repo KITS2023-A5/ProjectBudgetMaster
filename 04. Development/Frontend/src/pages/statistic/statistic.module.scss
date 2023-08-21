@@ -1,0 +1,28 @@
+@import "../../index.scss";
+
+.statisticpage__wrapper {
+  padding: 4rem;
+}
+
+.statisticpage__title {
+  color: $textColor;
+  margin-bottom: 2rem;
+  font-size: 1.8rem;
+}
+
+.statisticpage__content {
+  padding: 6rem 4rem;
+  background-color: #fff;
+  border-radius: 0.6rem;
+  margin-bottom: 2rem;
+
+  @include responsive(xs) {
+    padding: 5rem 2rem;
+  }
+}
+
+.statistic__card {
+  background-color: #f5f5f5;
+  margin-bottom: 2rem;
+  box-shadow: 0 0 0.875rem 0 rgba(53, 64, 82, 0.05) !important;
+}
