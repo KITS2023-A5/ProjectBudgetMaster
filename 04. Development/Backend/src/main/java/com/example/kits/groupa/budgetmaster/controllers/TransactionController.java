@@ -84,20 +84,20 @@ public class TransactionController {
     }
 
     @PostMapping(consumes = "application/json")
-    public ResponseEntity<Transaction> createTransaction(@RequestHeader("Authorization") String authorizationHeader, @RequestBody TransactionRequest transactionRequest, @RequestPart(name="receipt", required = false) MultipartFile receiptFile) throws IOException {
+    public ResponseEntity<TransactionInfo> createTransaction(@RequestHeader("Authorization") String authorizationHeader, @RequestBody TransactionRequest transactionRequest, @RequestPart(name="receipt", required = false) MultipartFile receiptFile) throws IOException {
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        Transaction transaction = transactionService.createTransaction(userId, transactionRequest, receiptFile);
+        TransactionInfo transaction = transactionService.createTransaction(userId, transactionRequest, receiptFile);
         return new ResponseEntity<>(transaction, HttpStatus.CREATED);
     }
 
     @PutMapping("/{transactionId}")
-    public ResponseEntity<Transaction> updateTransaction(@RequestHeader("Authorization") String authorizationHeader,
+    public ResponseEntity<TransactionInfo> updateTransaction(@RequestHeader("Authorization") String authorizationHeader,
             @PathVariable int transactionId,
             @RequestBody TransactionUpdateRequest request) {
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        Transaction updatedTransaction = transactionService.updateTransaction(userId, transactionId, request);
+        TransactionInfo updatedTransaction = transactionService.updateTransaction(userId, transactionId, request);
         if (updatedTransaction != null) {
             return ResponseEntity.ok(updatedTransaction);
         } else {

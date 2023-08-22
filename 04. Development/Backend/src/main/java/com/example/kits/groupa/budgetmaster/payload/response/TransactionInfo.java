@@ -20,7 +20,14 @@ public class TransactionInfo {
     @Lob
     private byte[] receipt;
 
-    private Type type;
-
     private int categoryId;
+    private Long userId;
+
+    public TransactionInfo(double amount, String description, LocalDateTime createdTime, int categoryId, Long userId) {
+        this.amount = amount;
+        this.description = description;
+        this.createdTime = createdTime;
+        this.categoryId = categoryId;
+        this.userId = userId;
+    }
 }

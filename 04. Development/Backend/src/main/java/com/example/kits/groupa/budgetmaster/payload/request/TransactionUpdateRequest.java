@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TransactionUpdateRequest {
-    private double amount;
+    private Double amount;
     private String description;
     private byte[] receipt;
     private int categoryId;

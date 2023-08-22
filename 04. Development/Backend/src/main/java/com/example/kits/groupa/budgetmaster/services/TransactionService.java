@@ -43,7 +43,7 @@ public class TransactionService {
         return transactionRepository.findByUserId(userId, pageable);
     }
 
-    public Transaction createTransaction(Long userId, TransactionRequest transactionRequest, MultipartFile receiptFile) throws IOException {
+    public TransactionInfo createTransaction(Long userId, TransactionRequest transactionRequest, MultipartFile receiptFile) throws IOException {
         Transaction transaction = new Transaction();
         transaction.setAmount(transactionRequest.getAmount());
         transaction.setDescription(transactionRequest.getDescription());
@@ -67,7 +67,8 @@ public class TransactionService {
 //        String filePath = uploadDir + "/" + fileName;
 //        File file = new File(filePath);
 //        receiptFile.transferTo(file);
-        return transactionRepository.save(transaction);
+        transactionRepository.save(transaction);
+        return new TransactionInfo(transactionRequest.getAmount(), transactionRequest.getDescription(), LocalDateTime.now(), transactionRequest.getCategoryId(), userId);
     }
 
 
@@ -79,18 +80,25 @@ public class TransactionService {
         return transactionRepository.findAllByCategory(categoryId, userId, pageable);
     }
 
-    public Transaction updateTransaction(Long userId, int transactionId, TransactionUpdateRequest request) {
+    public TransactionInfo updateTransaction(Long userId, int transactionId, TransactionUpdateRequest request) {
         Optional<Transaction> optionalTransaction = transactionRepository.findById(transactionId);
         User user = userRepository.findById(userId).orElse(null);
         if (optionalTransaction.isPresent() && optionalTransaction.get().getUser().equals(user)) {
             Transaction transaction = optionalTransaction.get();
-            transaction.setAmount(request.getAmount());
-            transaction.setDescription(request.getDescription());
+            if (request.getAmount()!=null){
+                transaction.setAmount(request.getAmount());
+            }
+            if (request.getDescription()!=null){
+                transaction.setDescription(request.getDescription());
+            }
             transaction.setReceipt(request.getReceipt());
             Category category = categoryRepository.findById(request.getCategoryId()).orElse(null);
-            transaction.setCategory(category);
+            if(category!=null){
+                transaction.setCategory(category);
+            }
             transaction.setUpdatedTime(LocalDateTime.now());
-            return transactionRepository.save(transaction);
+            transactionRepository.save(transaction);
+            return new TransactionInfo(transaction.getAmount(), transaction.getDescription(), transaction.getCreatedTime(), transaction.getUpdatedTime(), transaction.getReceipt(), transaction.getCategory().getCategoryId(), userId);
         } else {
             return null;
         }
@@ -99,6 +107,11 @@ public class TransactionService {
     public List<TransactionProjection> getTransactionsBetweenDates(LocalDateTime startDate, LocalDateTime endDate, Long userId, Pageable pageable) {
         return transactionRepository.findAllBetweenDates(startDate, endDate, userId, pageable);
     }
+
+    public List<TransactionProjection> getAllExpenseByUser(Long userId) {
+        return transactionRepository.findAllExpenseByUserId(userId);
+    }
+
     public void deleteTransaction(Long userId, int transactionId) {
         Transaction existingTransaction = transactionRepository.findByTransactionIdAndUserId(transactionId, userId);
         if (existingTransaction != null) {
