@@ -25,6 +25,8 @@ public class Transaction {
     @Lob
     private byte[] receipt;
 
+    private Boolean visible;
+  
     @ManyToOne
     @JoinColumn(name = "categoryId", referencedColumnName = "categoryId")
     private Category category;

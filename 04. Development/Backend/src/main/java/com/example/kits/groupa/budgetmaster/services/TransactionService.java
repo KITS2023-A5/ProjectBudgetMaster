@@ -6,6 +6,7 @@ import com.example.kits.groupa.budgetmaster.entities.User;
 import com.example.kits.groupa.budgetmaster.entities.enumeration.Type;
 import com.example.kits.groupa.budgetmaster.payload.request.TransactionRequest;
 import com.example.kits.groupa.budgetmaster.payload.request.TransactionUpdateRequest;
+import com.example.kits.groupa.budgetmaster.payload.response.ExpenseStatistics;
 import com.example.kits.groupa.budgetmaster.payload.response.TransactionInfo;
 import com.example.kits.groupa.budgetmaster.repositories.CategoryRepository;
 import com.example.kits.groupa.budgetmaster.repositories.TransactionProjection;
@@ -52,20 +53,20 @@ public class TransactionService {
         transaction.setCategory(category);
         User user = userRepository.findById(userId).orElse(null);
         transaction.setUser(user);
-
-        try {
-            if (receiptFile != null && !receiptFile.isEmpty()) {
-                byte[] receiptBytes = receiptFile.getBytes();
-                transaction.setReceipt(receiptBytes);
-            }
-        } catch (IOException e) {
-
-        }
-        String fileName = receiptFile.getOriginalFilename();
-        String uploadDir = "/file/upload"; // Specify the directory where you want to save the files
-        String filePath = uploadDir + "/" + fileName;
-        File file = new File(filePath);
-        receiptFile.transferTo(file);
+        transaction.setVisible(true);
+//        try {
+//            if (receiptFile != null && !receiptFile.isEmpty()) {
+//                byte[] receiptBytes = receiptFile.getBytes();
+//                transaction.setReceipt(receiptBytes);
+//            }
+//        } catch (IOException e) {
+//
+//        }
+//        String fileName = receiptFile.getOriginalFilename();
+//        String uploadDir = "/file/upload"; // Specify the directory where you want to save the files
+//        String filePath = uploadDir + "/" + fileName;
+//        File file = new File(filePath);
+//        receiptFile.transferTo(file);
         return transactionRepository.save(transaction);
     }
 
@@ -98,10 +99,86 @@ public class TransactionService {
     public List<TransactionProjection> getTransactionsBetweenDates(LocalDateTime startDate, LocalDateTime endDate, Long userId, Pageable pageable) {
         return transactionRepository.findAllBetweenDates(startDate, endDate, userId, pageable);
     }
-//    public void deleteTransaction(Long userId, int transactionId) {
-//        Transaction existingTransaction = transactionRepository.findByTransactionIdAndUserId(transactionId, userId);
-//        if (existingTransaction != null) {
-//            transactionRepository.delete(existingTransaction);
-//        }
-//    }
+    public void deleteTransaction(Long userId, int transactionId) {
+        Transaction existingTransaction = transactionRepository.findByTransactionIdAndUserId(transactionId, userId);
+        if (existingTransaction != null) {
+            existingTransaction.setVisible(false);
+        }
+    }
+
+    public List<ExpenseStatistics> getExpenseDaily(Long userId){
+        List<Object[]> results = transactionRepository.findExpenseByUserDaily(userId);
+        return getExpenseStatistics(results);
+    }
+
+    public List<ExpenseStatistics> getExpenseWeekly(Long userId){
+        List<Object[]> results = transactionRepository.findExpenseByUserWeekly(userId);
+        return getExpenseStatistics(results);
+    }
+
+    public List<ExpenseStatistics> getExpenseMonthly(Long userId){
+        List<Object[]> results = transactionRepository.findExpenseByUserMonthly(userId);
+        return getExpenseStatistics(results);
+    }
+
+    public List<ExpenseStatistics> getExpenseYearly(Long userId){
+        List<Object[]> results = transactionRepository.findExpenseByUserYearly(userId);
+        return getExpenseStatistics(results);
+    }
+
+    public List<ExpenseStatistics> getExpenseLastXDays(Long userId, int X){
+        List<Object[]> results = transactionRepository.findExpenseByUserLastXDays(userId, X);
+        return getExpenseStatistics(results);
+    }
+
+    private List<ExpenseStatistics> getExpenseStatistics(List<Object[]> results) {
+        List<ExpenseStatistics> expenseStatisticsList = new ArrayList<>();
+
+        for (Object[] result : results) {
+            String timePeriod = (String) result[0];
+            Double expense = (Double) result[1];
+
+            ExpenseStatistics expenseStatistics = new ExpenseStatistics();
+            expenseStatistics.setTimePeriod(timePeriod);
+            expenseStatistics.setExpense(expense);
+
+            expenseStatisticsList.add(expenseStatistics);
+        }
+
+        return expenseStatisticsList;
+    }
+
+    public List<Double> getSavingsPrediction(Long userId, int futurePeriods) {
+        List<Double> amounts = new ArrayList<>();
+        List<TransactionProjection> transactions = transactionRepository.findByUserId(userId);
+        for (TransactionProjection transaction : transactions) {
+            if (transaction.getType() == Type.EXPENSE) {
+                amounts.add(transaction.getAmount() * -1);
+            } else {
+                amounts.add(transaction.getAmount());
+            }
+        }
+
+        List<Double> predictedAmounts = new ArrayList<>();
+        int n = amounts.size();
+        int windowSize = (int) Math.ceil(n * 0.6); // Adjusted windowSize calculation
+
+        for (int i = n; i < n + futurePeriods; i++) {
+            int startIndex = Math.max(0, i - windowSize);
+            int endIndex = Math.min(i, n); // Adjusted endIndex calculation
+            List<Double> window = amounts.subList(startIndex, endIndex);
+            double average = calculateAverage(window);
+            predictedAmounts.add(average);
+        }
+
+        return predictedAmounts;
+    }
+
+    private double calculateAverage(List<Double> values) {
+        double sum = 0.0;
+        for (double value : values) {
+            sum += value;
+        }
+        return sum / values.size();
+    }
 }

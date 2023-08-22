@@ -69,6 +69,7 @@ const Sidebar = () => {
           placement={"left"}
           onClose={handleDrawerToggle}
           open={collapsed}
+          width={260}
           style={{
             backgroundImage: `url(${bgImg4})`,
           }}
