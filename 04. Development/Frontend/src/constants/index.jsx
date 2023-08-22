@@ -1,17 +1,13 @@
 /* eslint-disable react-refresh/only-export-components */
+import classNames from "classnames/bind";
 import {
   FaChartPie,
-  FaCircleExclamation,
-  FaCircleQuestion,
   FaFileInvoiceDollar,
-  FaGear,
   FaLinkedin,
   FaMars,
   FaMarsAndVenus,
   FaMoneyBillTransfer,
   FaPiggyBank,
-  FaRegIdCard,
-  FaRightFromBracket,
   FaSquareFacebook,
   FaSquareGithub,
   FaSquareYoutube,
@@ -19,9 +15,13 @@ import {
   FaUserGear,
   FaVenus,
 } from "react-icons/fa6";
-import classNames from "classnames/bind";
 import styles from "../pages/signup/signup.module.scss";
-import { Link } from "react-router-dom";
+import VietnameseIcon from "../assets/images/vietnam.png";
+import EnglishIcon from "../assets/images/united-kingdom.png";
+import imgSidebar1 from "../assets/images/sidebar-img1.jpg";
+import imgSidebar2 from "../assets/images/sidebar-img2.jpg";
+import imgSidebar3 from "../assets/images/sidebar-img3.jpg";
+import imgSidebar4 from "../assets/images/sidebar-img4.jpg";
 
 const cx = classNames.bind(styles);
 
@@ -64,6 +64,19 @@ export const GENDERS = [
         }}
       />
     ),
+  },
+];
+
+export const TRANSACTION_TYPE = [
+  {
+    name: "income",
+    value: "income",
+    label: "income",
+  },
+  {
+    name: "expense",
+    value: "expense",
+    label: "expense",
   },
 ];
 
@@ -135,50 +148,49 @@ export const HOME_INTRO = [
   },
 ];
 
-export const MENU_DROPDOWN_ITEMS = [
+export const LANGUAGES = [
+  { label: "Vietnamese", code: "VIE", icon: VietnameseIcon },
+  { label: "English", code: "ENG", icon: EnglishIcon },
+];
+
+export const COLOR_FILTERS = [
   {
-    label: <Link to={"/profile"}>Profile</Link>,
-    key: "0",
-    icon: <FaRegIdCard />,
-    style: {
-      fontSize: "1.4rem",
-      padding: "0.8rem",
-    },
+    value: "color1",
+    name: "green",
+    color: "#009d9d",
   },
   {
-    label: "Settings",
-    key: "1",
-    icon: <FaGear />,
-    style: {
-      fontSize: "1.4rem",
-      padding: "0.8rem",
-    },
+    value: "color2",
+    name: "blue",
+    color: "#00bbff",
   },
   {
-    label: "Help & support",
-    key: "2",
-    icon: <FaCircleQuestion />,
-    style: {
-      fontSize: "1.4rem",
-      padding: "0.8rem",
-    },
+    value: "color3",
+    name: "orange",
+    color: "#ff9800",
   },
   {
-    label: "Give feedback",
-    key: "3",
-    icon: <FaCircleExclamation />,
-    style: {
-      fontSize: "1.4rem",
-      padding: "0.8rem",
-    },
+    value: "color4",
+    name: "rose",
+    color: "#e91e63",
+  },
+];
+
+export const IMAGE_FILTERS = [
+  {
+    value: imgSidebar1,
+    name: "img1",
   },
   {
-    label: "Logout",
-    key: "4",
-    icon: <FaRightFromBracket />,
-    style: {
-      fontSize: "1.4rem",
-      padding: "0.8rem",
-    },
+    value: imgSidebar2,
+    name: "img2",
+  },
+  {
+    value: imgSidebar3,
+    name: "img3",
+  },
+  {
+    value: imgSidebar4,
+    name: "img4",
   },
 ];
