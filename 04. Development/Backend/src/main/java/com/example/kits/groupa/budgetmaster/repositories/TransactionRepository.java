@@ -16,6 +16,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
     @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, t.updatedTime AS updatedTime, t.receipt AS receipt FROM Transaction t WHERE t.user.userId = :userId")
     List<TransactionProjection> findByUserId(@Param("userId") Long userId, Pageable pageable);
 
+    @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, t.updatedTime AS updatedTime, t.receipt AS receipt FROM Transaction t WHERE t.user.userId = :userId")
+    List<TransactionProjection> findByUserId(@Param("userId") Long userId);
+
     @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, t.updatedTime AS updatedTime, t.receipt AS receipt FROM Transaction t WHERE t.category.name LIKE %:category% AND t.user.userId = :userId")
     List<TransactionProjection> findAllByCategoryName(@Param("category") String category, @Param("userId") Long userId, Pageable pageable);
 
