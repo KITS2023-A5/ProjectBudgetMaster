@@ -10,5 +10,5 @@ public class TransactionUpdateRequest {
     private double amount;
     private String description;
     private byte[] receipt;
-    private Type type;
+    private int categoryId;
 }

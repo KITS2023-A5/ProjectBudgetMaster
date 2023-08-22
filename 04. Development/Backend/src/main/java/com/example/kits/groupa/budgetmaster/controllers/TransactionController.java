@@ -47,17 +47,17 @@ public class TransactionController {
         }
     }
 
-    @GetMapping("/type/{type}")
-    public ResponseEntity<List<TransactionProjection>> getTransactionByType(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Type type, Pageable pageable) {
-        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
-        Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        List<TransactionProjection> transaction = transactionService.getTransactionsByType(type, userId, pageable);
-        if (transaction != null) {
-            return new ResponseEntity<>(transaction, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
+//    @GetMapping("/type/{type}")
+//    public ResponseEntity<List<TransactionProjection>> getTransactionByType(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Type type, Pageable pageable) {
+//        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+//        Long userId = jwtUtils.getUserIdFromJwtToken(token);
+//        List<TransactionProjection> transaction = transactionService.getTransactionsByType(type, userId, pageable);
+//        if (transaction != null) {
+//            return new ResponseEntity<>(transaction, HttpStatus.OK);
+//        } else {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//    }
 
     @GetMapping("/category")
     public ResponseEntity<List<TransactionProjection>> getTransactionByCategoryName(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String category, Pageable pageable){
