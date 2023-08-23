@@ -9,6 +9,6 @@ import lombok.Setter;
 public class TransactionUpdateRequest {
     private Double amount;
     private String description;
-    private byte[] receipt;
+    private String receipt;
     private int categoryId;
 }

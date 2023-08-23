@@ -21,4 +21,5 @@ public class Category {
     @Enumerated(EnumType.STRING)
     private Type type;
 
+    private String colorCode;
 }

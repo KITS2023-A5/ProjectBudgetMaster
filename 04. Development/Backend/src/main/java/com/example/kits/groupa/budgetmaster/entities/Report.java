@@ -5,8 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Optional;
 
 @Data
 @NoArgsConstructor
@@ -18,10 +20,17 @@ public class Report {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int reportId;
     private LocalDateTime createDate;
-    private Date startTime;
-    private Date endTime;
+    private LocalDate startTime;
+    private LocalDate endTime;
 
     @ManyToOne
     @JoinColumn(name = "userId", referencedColumnName = "userId")
     private User user;
+
+    public Report(LocalDateTime createDate, LocalDate startTime, LocalDate endTime, User user) {
+        this.createDate = createDate;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.user = user;
+    }
 }

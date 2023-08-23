@@ -22,8 +22,7 @@ public class Transaction {
     private LocalDateTime createdTime;
     private LocalDateTime updatedTime;
 
-    @Lob
-    private byte[] receipt;
+    private String receipt;
 
     private Boolean visible;
   

@@ -1,6 +1,7 @@
 package com.example.kits.groupa.budgetmaster.repositories;
 
 import com.example.kits.groupa.budgetmaster.entities.Transaction;
+import com.example.kits.groupa.budgetmaster.entities.enumeration.Type;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -48,8 +49,19 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
             "WHERE t.user.userId = :userId AND t.createdTime BETWEEN :start AND :end AND t.visible=true")
     List<TransactionProjection> findAllBetweenDates(LocalDateTime start, LocalDateTime end, Long userId, Pageable pageable);
 
+    @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, " +
+            "t.updatedTime AS updatedTime, t.receipt AS receipt, t.category.type AS type " +
+            "FROM Transaction t " +
+            "WHERE t.user.userId = :userId AND t.createdTime BETWEEN :start AND :end AND t.visible=true order by t.createdTime desc")
+    List<TransactionProjection> findAllBetweenDates(LocalDateTime start, LocalDateTime end, Long userId);
+
     @Query("SELECT t from Transaction t WHERE t.transactionId= :transactionId AND t.user.userId = :userId AND t.visible=true")
     Transaction findByTransactionIdAndUserId(int transactionId, Long userId);
+
+    @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, " +
+            "t.updatedTime AS updatedTime, t.receipt AS receipt, t.category.type AS type FROM Transaction t " +
+            "WHERE t.category.type = :type AND t.user.userId = :userId AND t.visible=true")
+    List<TransactionProjection> findTransactionByType(Type type, Long userId, Pageable pageable);
 
     @Query(value = "SELECT DATE_FORMAT(created_time, '%d-%m-%Y') as timePeriod, sum(amount) as expense FROM transaction t " +
             "JOIN category c ON t.category_id = c.category_id " +
@@ -87,4 +99,5 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
             "order by timePeriod desc "
             , nativeQuery = true)
     List<Object[]> findExpenseByUserLastXDays(Long userId, int X);
+
 }

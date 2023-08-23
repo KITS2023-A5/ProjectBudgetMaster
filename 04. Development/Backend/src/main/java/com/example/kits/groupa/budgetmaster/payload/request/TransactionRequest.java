@@ -11,6 +11,7 @@ public class TransactionRequest {
     private double amount;
     private String description;
     private int categoryId;
+    private String receipt;
     private Long userId;
 
 }

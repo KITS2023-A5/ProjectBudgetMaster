@@ -17,8 +17,7 @@ public class TransactionInfo {
     private LocalDateTime createdTime;
     private LocalDateTime updatedTime;
 
-    @Lob
-    private byte[] receipt;
+    private String receipt;
 
     private int categoryId;
     private Long userId;
