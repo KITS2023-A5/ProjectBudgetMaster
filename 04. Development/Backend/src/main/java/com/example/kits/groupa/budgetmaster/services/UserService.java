@@ -41,7 +41,7 @@ public class UserService {
         Optional<User> userOptional = userRepository.findById(userId);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            return new UserInfo(user.getName(), user.getUsername(), user.getEmail(), user.getImage(), user.getCurrency());
+            return new UserInfo(user.getName(), user.getUsername(), user.getEmail(), user.getImage(), user.getCurrency(), user.getGender(), user.getDob(), user.getPhone());
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
         }

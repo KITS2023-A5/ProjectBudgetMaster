@@ -66,6 +66,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                                 .requestMatchers("/**").permitAll()
                                 .requestMatchers("/api/user/**").hasAuthority(String.valueOf("ROLE_USER"))
                                 .requestMatchers("/api/admin/**").hasAuthority(String.valueOf("ROLE_ADMIN"))
+                                .requestMatchers("/api/all/**").hasAnyAuthority(String.valueOf("ROLE_USER"), String.valueOf("ROLE_ADMIN"))
                                 .anyRequest().authenticated()
 
                 );
