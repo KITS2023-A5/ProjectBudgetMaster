@@ -100,4 +100,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
             , nativeQuery = true)
     List<Object[]> findExpenseByUserLastXDays(Long userId, int X);
 
+    @Query("SELECT t.user.userId, t.user.username, SUM(CASE WHEN t.category.type = 'INCOME' THEN t.amount ELSE 0 END) AS income, " +
+            "SUM(CASE WHEN t.category.type = 'EXPENSE' THEN t.amount ELSE 0 END) AS expense " +
+            "FROM Transaction t " +
+            "GROUP BY t.user.userId, t.user.username")
+    List<Object[]> calculateIncomeAndExpenseByUser();
 }

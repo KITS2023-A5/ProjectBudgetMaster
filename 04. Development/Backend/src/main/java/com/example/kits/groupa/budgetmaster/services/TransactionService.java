@@ -1,17 +1,21 @@
 package com.example.kits.groupa.budgetmaster.services;
 
 import com.example.kits.groupa.budgetmaster.entities.Category;
+import com.example.kits.groupa.budgetmaster.entities.Role;
 import com.example.kits.groupa.budgetmaster.entities.Transaction;
 import com.example.kits.groupa.budgetmaster.entities.User;
+import com.example.kits.groupa.budgetmaster.entities.enumeration.ERole;
 import com.example.kits.groupa.budgetmaster.entities.enumeration.Type;
 import com.example.kits.groupa.budgetmaster.payload.request.TransactionRequest;
 import com.example.kits.groupa.budgetmaster.payload.request.TransactionUpdateRequest;
 import com.example.kits.groupa.budgetmaster.payload.response.ExpenseStatistics;
 import com.example.kits.groupa.budgetmaster.payload.response.TransactionInfo;
+import com.example.kits.groupa.budgetmaster.payload.response.UserIncomeResponse;
 import com.example.kits.groupa.budgetmaster.repositories.*;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,10 +25,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.zip.Deflater;
 
 @Service
@@ -161,54 +162,4 @@ public class TransactionService {
 
         return expenseStatisticsList;
     }
-
-    public List<Double> getSavingsPrediction(Long userId, int futurePeriods) {
-        List<Double> amounts = new ArrayList<>();
-        List<TransactionProjection> transactions = transactionRepository.findByUserId(userId);
-        double income = 0;
-        double expenses = 0;
-
-        for (TransactionProjection transaction : transactions) {
-            if (transaction.getType() == Type.EXPENSE) {
-                expenses += transaction.getAmount();
-            } else {
-                income += transaction.getAmount();
-            }
-        }
-
-        double savings = income - expenses;
-
-        List<Double> predictedSavings = new ArrayList<>();
-        int n = transactions.size();
-        int windowSize = n;
-
-        for (int i = n; i < n + futurePeriods; i++) {
-            int startIndex = Math.max(0, i - windowSize);
-            int endIndex = Math.min(i, n);
-            List<TransactionProjection> window = transactions.subList(startIndex, endIndex);
-            double windowIncome = 0;
-            double windowExpenses = 0;
-
-            for (TransactionProjection transaction : window) {
-                if (transaction.getType() == Type.EXPENSE) {
-                    windowExpenses += transaction.getAmount();
-                } else {
-                    windowIncome += transaction.getAmount();
-                }
-            }
-
-            double windowSavings = windowIncome - windowExpenses;
-            predictedSavings.add(windowSavings);
-        }
-
-        return predictedSavings;
-    }
-
-    public List<TransactionProjection> getMonthlyTransactions(Long userId, int year, int month) {
-        LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0, 0);
-        LocalDateTime endDateTime = startDateTime.with(TemporalAdjusters.lastDayOfMonth()).with(LocalTime.MAX);
-
-        return transactionRepository.findAllBetweenDates(startDateTime, endDateTime, userId);
-    }
-
 }
