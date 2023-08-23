@@ -22,6 +22,7 @@ public class Budget {
     private Date startDate;
     private Date endDate;
 
+    private Boolean visible;
     @ManyToOne
     @JoinColumn(name="categoryId", referencedColumnName = "categoryId")
     private Category category;
