@@ -8,10 +8,8 @@ import com.example.kits.groupa.budgetmaster.payload.request.TransactionRequest;
 import com.example.kits.groupa.budgetmaster.payload.request.TransactionUpdateRequest;
 import com.example.kits.groupa.budgetmaster.payload.response.ExpenseStatistics;
 import com.example.kits.groupa.budgetmaster.payload.response.TransactionInfo;
-import com.example.kits.groupa.budgetmaster.repositories.CategoryRepository;
-import com.example.kits.groupa.budgetmaster.repositories.TransactionProjection;
-import com.example.kits.groupa.budgetmaster.repositories.TransactionRepository;
-import com.example.kits.groupa.budgetmaster.repositories.UserRepository;
+import com.example.kits.groupa.budgetmaster.repositories.*;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,9 +19,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.zip.Deflater;
 
 @Service
@@ -31,6 +32,7 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+
 
     @Autowired
     public TransactionService(TransactionRepository transactionRepository, CategoryRepository categoryRepository, UserRepository userRepository) {
@@ -43,7 +45,11 @@ public class TransactionService {
         return transactionRepository.findByUserId(userId, pageable);
     }
 
-    public Transaction createTransaction(Long userId, TransactionRequest transactionRequest, MultipartFile receiptFile) throws IOException {
+    public List<TransactionProjection> getTransactionsByType(Type type, Long userId, Pageable pageable) {
+        return transactionRepository.findTransactionByType(type, userId, pageable);
+    }
+
+    public TransactionInfo createTransaction(Long userId, TransactionRequest transactionRequest, MultipartFile receiptFile) throws IOException {
         Transaction transaction = new Transaction();
         transaction.setAmount(transactionRequest.getAmount());
         transaction.setDescription(transactionRequest.getDescription());
@@ -54,20 +60,16 @@ public class TransactionService {
         User user = userRepository.findById(userId).orElse(null);
         transaction.setUser(user);
         transaction.setVisible(true);
-//        try {
-//            if (receiptFile != null && !receiptFile.isEmpty()) {
-//                byte[] receiptBytes = receiptFile.getBytes();
-//                transaction.setReceipt(receiptBytes);
-//            }
-//        } catch (IOException e) {
-//
-//        }
-//        String fileName = receiptFile.getOriginalFilename();
-//        String uploadDir = "/file/upload"; // Specify the directory where you want to save the files
-//        String filePath = uploadDir + "/" + fileName;
-//        File file = new File(filePath);
-//        receiptFile.transferTo(file);
-        return transactionRepository.save(transaction);
+        if (receiptFile != null && !receiptFile.isEmpty()) {
+            // Save the receipt file to a location or process it as needed
+            String extension = FilenameUtils.getExtension(receiptFile.getOriginalFilename());
+            String fileName = UUID.randomUUID().toString() + "." + extension;
+            String filePath = "/receipts" + fileName; // Replace with the desired file path
+            receiptFile.transferTo(new File(filePath));
+            transaction.setReceipt(filePath);
+        }
+        transactionRepository.save(transaction);
+        return new TransactionInfo(transactionRequest.getAmount(), transactionRequest.getDescription(), LocalDateTime.now(), transactionRequest.getCategoryId(), userId);
     }
 
 
@@ -79,18 +81,25 @@ public class TransactionService {
         return transactionRepository.findAllByCategory(categoryId, userId, pageable);
     }
 
-    public Transaction updateTransaction(Long userId, int transactionId, TransactionUpdateRequest request) {
+    public TransactionInfo updateTransaction(Long userId, int transactionId, TransactionUpdateRequest request) {
         Optional<Transaction> optionalTransaction = transactionRepository.findById(transactionId);
         User user = userRepository.findById(userId).orElse(null);
         if (optionalTransaction.isPresent() && optionalTransaction.get().getUser().equals(user)) {
             Transaction transaction = optionalTransaction.get();
-            transaction.setAmount(request.getAmount());
-            transaction.setDescription(request.getDescription());
+            if (request.getAmount()!=null){
+                transaction.setAmount(request.getAmount());
+            }
+            if (request.getDescription()!=null){
+                transaction.setDescription(request.getDescription());
+            }
             transaction.setReceipt(request.getReceipt());
             Category category = categoryRepository.findById(request.getCategoryId()).orElse(null);
-            transaction.setCategory(category);
+            if(category!=null){
+                transaction.setCategory(category);
+            }
             transaction.setUpdatedTime(LocalDateTime.now());
-            return transactionRepository.save(transaction);
+            transactionRepository.save(transaction);
+            return new TransactionInfo(transaction.getAmount(), transaction.getDescription(), transaction.getCreatedTime(), transaction.getUpdatedTime(), transaction.getReceipt(), transaction.getCategory().getCategoryId(), userId);
         } else {
             return null;
         }
@@ -99,6 +108,11 @@ public class TransactionService {
     public List<TransactionProjection> getTransactionsBetweenDates(LocalDateTime startDate, LocalDateTime endDate, Long userId, Pageable pageable) {
         return transactionRepository.findAllBetweenDates(startDate, endDate, userId, pageable);
     }
+
+    public List<TransactionProjection> getAllExpenseByUser(Long userId) {
+        return transactionRepository.findAllExpenseByUserId(userId);
+    }
+
     public void deleteTransaction(Long userId, int transactionId) {
         Transaction existingTransaction = transactionRepository.findByTransactionIdAndUserId(transactionId, userId);
         if (existingTransaction != null) {
@@ -151,34 +165,50 @@ public class TransactionService {
     public List<Double> getSavingsPrediction(Long userId, int futurePeriods) {
         List<Double> amounts = new ArrayList<>();
         List<TransactionProjection> transactions = transactionRepository.findByUserId(userId);
+        double income = 0;
+        double expenses = 0;
+
         for (TransactionProjection transaction : transactions) {
             if (transaction.getType() == Type.EXPENSE) {
-                amounts.add(transaction.getAmount() * -1);
+                expenses += transaction.getAmount();
             } else {
-                amounts.add(transaction.getAmount());
+                income += transaction.getAmount();
             }
         }
 
-        List<Double> predictedAmounts = new ArrayList<>();
-        int n = amounts.size();
-        int windowSize = (int) Math.ceil(n * 0.6); // Adjusted windowSize calculation
+        double savings = income - expenses;
+
+        List<Double> predictedSavings = new ArrayList<>();
+        int n = transactions.size();
+        int windowSize = n;
 
         for (int i = n; i < n + futurePeriods; i++) {
             int startIndex = Math.max(0, i - windowSize);
-            int endIndex = Math.min(i, n); // Adjusted endIndex calculation
-            List<Double> window = amounts.subList(startIndex, endIndex);
-            double average = calculateAverage(window);
-            predictedAmounts.add(average);
+            int endIndex = Math.min(i, n);
+            List<TransactionProjection> window = transactions.subList(startIndex, endIndex);
+            double windowIncome = 0;
+            double windowExpenses = 0;
+
+            for (TransactionProjection transaction : window) {
+                if (transaction.getType() == Type.EXPENSE) {
+                    windowExpenses += transaction.getAmount();
+                } else {
+                    windowIncome += transaction.getAmount();
+                }
+            }
+
+            double windowSavings = windowIncome - windowExpenses;
+            predictedSavings.add(windowSavings);
         }
 
-        return predictedAmounts;
+        return predictedSavings;
     }
 
-    private double calculateAverage(List<Double> values) {
-        double sum = 0.0;
-        for (double value : values) {
-            sum += value;
-        }
-        return sum / values.size();
+    public List<TransactionProjection> getMonthlyTransactions(Long userId, int year, int month) {
+        LocalDateTime startDateTime = LocalDateTime.of(year, month, 1, 0, 0, 0);
+        LocalDateTime endDateTime = startDateTime.with(TemporalAdjusters.lastDayOfMonth()).with(LocalTime.MAX);
+
+        return transactionRepository.findAllBetweenDates(startDateTime, endDateTime, userId);
     }
+
 }
