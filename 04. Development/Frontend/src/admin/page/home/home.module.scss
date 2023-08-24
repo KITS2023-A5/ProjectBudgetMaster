@@ -1,0 +1,173 @@
+@import "/src/index.scss";
+
+.homepage__wide {
+  padding: 1rem 4rem 4rem 4rem;
+}
+
+.homepage__row {
+  display: flex;
+  justify-content: center;
+}
+
+.homepage__logo {
+  margin-bottom: 2rem;
+}
+
+.homepage__logo--img {
+  width: 100%;
+  height: 80%;
+  vertical-align: middle;
+  object-fit: contain;
+}
+
+.homepage__card {
+  height: 100%;
+
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-0.16rem);
+
+    & .homepage__card--number {
+      transform: scale(1.1);
+    }
+  }
+}
+
+.homepage__card--inner {
+  margin-bottom: 3rem;
+  border-radius: 1rem;
+  border-color: rgba(5, 24, 43, 0.08);
+  border: 0.1rem solid #e0e1e4;
+  position: relative;
+}
+
+.homepage__card--center {
+  border-radius: 1rem;
+  margin: -0.5rem 0.5rem 0.5rem -0.5rem;
+  padding: 5rem;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 1rem 2rem 0 rgb(5 24 43 / 10%);
+
+  &.orange {
+    background-color: #ffe6df;
+
+    & .homepage__card--icon {
+      color: #ff6726;
+    }
+  }
+
+  &.green {
+    background-color: #cff4ee;
+
+    & .homepage__card--icon {
+      color: #2fd9c4;
+    }
+  }
+
+  &.blue {
+    background-color: #d1e4ff;
+
+    & .homepage__card--icon {
+      color: #3a9efe;
+    }
+  }
+
+  &.black {
+    background-color: #05182b;
+    color: $whiteColor;
+
+    & .homepage__card--title,
+    .homepage__card--desc {
+      color: $whiteColor;
+    }
+
+    & .homepage__card--number {
+      color: #1d3248;
+    }
+
+    & .homepage__card--icon {
+      color: $whiteColor;
+    }
+  }
+
+  &.grey {
+    background-color: #dddee0;
+
+    & .homepage__card--icon {
+      color: #05182b;
+    }
+  }
+
+  &.violet {
+    background-color: #e8deff;
+
+    & .homepage__card--icon {
+      color: #7a14ff;
+    }
+  }
+}
+
+.homepage__card--number {
+  color: rgba(5, 24, 43, 0.05);
+  position: absolute;
+  display: block;
+  font-size: 11.5rem;
+  line-height: 11.5rem;
+  font-weight: 800;
+  right: 2rem;
+  top: -3.2rem;
+  user-select: none;
+  text-align: right;
+  z-index: 1;
+}
+
+.homepage__card--head {
+  position: relative;
+  display: flex;
+  z-index: 2;
+}
+
+.homepage__card--title {
+  color: $textColor;
+  font-size: 2.8rem;
+  line-height: 2.8rem;
+  font-weight: 800;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.homepage__card--icon {
+  font-size: 4.8rem;
+  margin-right: 2rem;
+}
+
+.homepage__card--desc {
+  margin-top: 2rem;
+  font-size: 1.8rem;
+  line-height: 3.2rem;
+  color: rgba(5, 24, 43, 0.7);
+  font-weight: 400;
+  min-height: 25rem;
+
+  @include responsive(xl) {
+    min-height: 25rem;
+  }
+
+  @include responsive(lg) {
+    min-height: 16rem;
+  }
+
+  @include responsive(md) {
+    min-height: 19.2rem;
+  }
+
+  @include responsive(sm) {
+    min-height: 11rem;
+  }
+
+  @include responsive(xs) {
+    min-height: 11rem;
+  }
+}
