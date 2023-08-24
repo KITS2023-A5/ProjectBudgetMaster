@@ -1,32 +1,66 @@
+import { Button, Checkbox, Form, Input, notification } from "antd";
 import classNames from "classnames/bind";
-import styles from "./login.module.scss";
-import { Button, Checkbox, Form, Input } from "antd";
-import FormComponent from "../../components/form";
-import { Link, useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
+import { useEffect } from "react";
 import { FaLock, FaUserLarge } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
-import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axiosInstance from "../../api/apiConfig";
+import FormComponent from "../../components/form";
+import styles from "./login.module.scss";
+import { unwrapResult } from "@reduxjs/toolkit";
+import { requestLogin } from "../../redux/slices/authSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const cx = classNames.bind(styles);
 
 const LoginPage = () => {
   const navigator = useNavigate();
+  const dispatch = useDispatch();
+  const userInfo = useSelector((state) => state.auth.userInfo);
+
   useEffect(() => {
     document.title = "Login";
   }, []);
 
-  // handleLogin = async (data) => {
-  //   try {
-  //     const { username, password } = data;
+  useEffect(() => {
+    if (userInfo?.username) {
+      navigator(-1);
+    }
+  }, [userInfo]);
 
-  //     const res = await axios.post("/api/v1/signin", { username, password });
-  //     const accessToken = res.data.accessToken;
+  const handleLogin = async (data) => {
+    try {
+      const { usernameOrEmail, password } = data;
+      const actionResult = await dispatch(
+        requestLogin({ usernameOrEmail, password })
+      );
+      const res = unwrapResult(actionResult);
 
-  //     navigator("/");
-  //   } catch (error) {
-  //     console.log("err" + error);
-  //   }
-  // };
+      switch (res.status) {
+        case 200:
+          Cookies.set("token", res.data.token, {
+            expires: 60 * 60 * 24 * 30,
+          });
+          navigator("/");
+          return notification.success({
+            message: "Login successful",
+            duration: 1.5,
+          });
+
+        default:
+          return notification.error({
+            message: "Login failed",
+            duration: 1.5,
+          });
+      }
+    } catch (error) {
+      notification.error({
+        message: "Server error",
+        duration: 1.5,
+      });
+    }
+  };
 
   return (
     <>
@@ -39,10 +73,10 @@ const LoginPage = () => {
             initialValues={{
               remember: true,
             }}
-            // onFinish={handleLogin}
+            onFinish={handleLogin}
           >
             <Form.Item
-              name="account"
+              name="usernameOrEmail"
               rules={[
                 {
                   required: true,

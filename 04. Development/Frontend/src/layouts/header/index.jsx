@@ -1,6 +1,16 @@
-import { Avatar, Button, Col, Dropdown, Modal, Row, Select } from "antd";
+import {
+  Avatar,
+  Button,
+  Col,
+  Dropdown,
+  Form,
+  Input,
+  Modal,
+  Row,
+  Select,
+} from "antd";
 import classNames from "classnames/bind";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   FaBars,
@@ -18,20 +28,28 @@ import fallbackAvatar from "../../assets/images/fallback-avt.jpg";
 import { COLOR_FILTERS, IMAGE_FILTERS, LANGUAGES } from "../../constants";
 import { toggleCollapsed } from "../../redux/slices/collapsedSlice";
 import styles from "./header.module.scss";
+import { useForm } from "antd/es/form/Form";
+import TextArea from "antd/es/input/TextArea";
+import Cookies from "js-cookie";
 
 const cx = classNames.bind(styles);
 
 const Header = () => {
+  const dispatch = useDispatch();
+  const [formFeedback] = Form.useForm();
+  const { i18n, t } = useTranslation();
+
+  const userInfo = useSelector((state) => state.auth.userInfo);
+  const loading = useSelector((state) => state.auth.loading);
+  const collapsed = useSelector((state) => state.collapsed);
+
   const [isModalSettingsOpen, setIsModalSettingsOpen] = useState(false);
+  const [isModalFeedbackOpen, setIsModalFeedbackOpen] = useState(false);
   const [activeColorOption, setActiveColorOption] = useState("color1");
   const [activeImageOption, setActiveImageOption] = useState(
     IMAGE_FILTERS[3].value
   );
-
-  const dispatch = useDispatch();
-  const collapsed = useSelector((state) => state.collapsed);
-
-  const { i18n, t } = useTranslation();
+  const [feedbackSubmittable, setFeedbackSubmittable] = useState(true);
 
   const handleImageOptionClick = (imageValue) => {
     setActiveImageOption(imageValue);
@@ -53,14 +71,39 @@ const Header = () => {
     setIsModalSettingsOpen(false);
   };
 
+  const handleOpenFeedback = () => {
+    setIsModalFeedbackOpen(true);
+  };
+
+  const handleFeedbackOk = () => {
+    setIsModalFeedbackOpen(false);
+  };
+
+  const handleFeedbackCancel = () => {
+    formFeedback.setFieldsValue({
+      title: "",
+      description: "",
+    });
+    setIsModalFeedbackOpen(false);
+  };
+
   const onChangeLang = (value) => {
     i18n.changeLanguage(value);
   };
 
   const onChange = (e) => {
-    console.log(e.target.value);
+    // console.log(e.target.value);
     setColorValue(e.target.value);
   };
+
+  const handleLogout = useCallback(async () => {
+    try {
+      Cookies.remove("token");
+      window.location.href = "/";
+    } catch (error) {
+      notification.error({ message: "Lỗi server", duration: 1.5 });
+    }
+  }, []);
 
   const MENU_DROPDOWN_ITEMS = [
     {
@@ -99,11 +142,13 @@ const Header = () => {
         fontSize: "1.4rem",
         padding: "0.8rem",
       },
+      onClick: handleOpenFeedback,
     },
     {
       label: "Logout",
       key: "4",
       icon: <FaRightFromBracket />,
+      onClick: handleLogout,
       style: {
         fontSize: "1.4rem",
         padding: "0.8rem",
@@ -123,30 +168,38 @@ const Header = () => {
           />
 
           <div className={cx("header__auth")}>
-            {/* <div className={cx("header__combo--btn")}>
-              <Link to={"/login"} className={cx("header__btn--link")}>
-                <button className={cx("header__button")}>Login</button>
-              </Link>
-              <Link to={"/signup"} className={cx("header__btn--link")}>
-                <button className={cx("header__button")}>Signup</button>
-              </Link>
-            </div> */}
-
-            <Dropdown
-              menu={{ items: MENU_DROPDOWN_ITEMS }}
-              trigger={["click"]}
-              placement={"bottomRight"}
-            >
-              <button className={cx("header__avatar--btn")}>
-                <Avatar
-                  className={cx("header__avatar")}
-                  size={40}
-                  src={fallbackAvatar}
-                />
-                <span className={cx("header__avatar--name")}>Name</span>
-                <FaChevronDown className={cx("profile__avatar--icon")} />
-              </button>
-            </Dropdown>
+            {userInfo ? (
+              <Dropdown
+                menu={{ items: MENU_DROPDOWN_ITEMS }}
+                trigger={["click"]}
+                placement={"bottomRight"}
+              >
+                <button className={cx("header__avatar--btn")}>
+                  <Avatar
+                    className={cx("header__avatar")}
+                    size={40}
+                    src={
+                      userInfo && userInfo.image != null
+                        ? userInfo.image
+                        : fallbackAvatar
+                    }
+                  />
+                  <span className={cx("header__avatar--name")}>
+                    {userInfo.username}
+                  </span>
+                  <FaChevronDown className={cx("profile__avatar--icon")} />
+                </button>
+              </Dropdown>
+            ) : (
+              <div className={cx("header__combo--btn")}>
+                <Link to={"/login"} className={cx("header__btn--link")}>
+                  <button className={cx("header__button")}>Login</button>
+                </Link>
+                <Link to={"/signup"} className={cx("header__btn--link")}>
+                  <button className={cx("header__button")}>Signup</button>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -217,6 +270,45 @@ const Header = () => {
             </div>
           </Col>
         </Row>
+      </Modal>
+
+      <Modal
+        title="Give feedback"
+        open={isModalFeedbackOpen}
+        onOk={handleFeedbackOk}
+        onCancel={handleFeedbackCancel}
+        okText={"Submit"}
+        okButtonProps={{
+          disabled: feedbackSubmittable,
+        }}
+      >
+        <Form
+          form={formFeedback}
+          name="formFeedback"
+          layout="vertical"
+          onFieldsChange={() =>
+            setFeedbackSubmittable(
+              formFeedback
+                .getFieldsError()
+                .every((field) => field.errors.length > 0)
+            )
+          }
+        >
+          <Form.Item name="title" label={"How can we improve?"}>
+            <Input
+              type="text"
+              placeholder="Problem name"
+              style={{ padding: "1.2rem" }}
+            />
+          </Form.Item>
+          <Form.Item name="description" label={"Details"}>
+            <TextArea
+              rows={4}
+              placeholder="Please include as much info as possible..."
+              style={{ resize: "none", padding: "1.2rem" }}
+            />
+          </Form.Item>
+        </Form>
       </Modal>
     </>
   );

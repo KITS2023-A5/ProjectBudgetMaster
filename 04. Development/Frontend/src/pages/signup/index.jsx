@@ -29,11 +29,14 @@ import {
   PhoneRegExp,
   UsernameRegExp,
 } from "../../utils/validation";
+import { useDispatch } from "react-redux";
+import { requestRegister } from "../../redux/slices/authSlice";
 
 const cx = classNames.bind(styles);
 
 const SignupPage = () => {
   const [formSignup] = Form.useForm();
+  const dispatch = useDispatch();
 
   const [agreementChecked, setAgreementChecked] = useState(false);
 
@@ -41,9 +44,14 @@ const SignupPage = () => {
     document.title = "Sign up";
   }, []);
 
-  const onFinish = (values) => {
-    // TODO: api signup hear
-    console.log("Received values of form: ", values);
+  const onFinish = async (values) => {
+    console.log({ ...values, role: ["ROLE_USER"] });
+    try {
+      const actionResult = await dispatch(requestRegister(values));
+      const res = unwrapResult(actionResult);
+    } catch (error) {
+      console.log("error: " + error);
+    }
   };
 
   return (
@@ -145,7 +153,7 @@ const SignupPage = () => {
 
               <Col xl={12} lg={12} md={12} sm={12} xs={24}>
                 <Form.Item
-                  name="phoneNumber"
+                  name="phone"
                   rules={[
                     {
                       // pattern: /^0\d{9}$/,
@@ -221,7 +229,7 @@ const SignupPage = () => {
 
               <Col xl={12} lg={12} md={12} sm={12} xs={24}>
                 <Form.Item
-                  name="birth"
+                  name="dob"
                   rules={[
                     {
                       required: true,

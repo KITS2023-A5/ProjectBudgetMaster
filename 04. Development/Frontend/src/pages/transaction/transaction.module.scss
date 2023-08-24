@@ -2,6 +2,10 @@
 
 .transaction__wrapper {
   padding: 4rem;
+
+  @include responsive(xs) {
+    padding: 4rem 1rem;
+  }
 }
 
 .transaction__title {
@@ -40,4 +44,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.transaction__dateselect {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.transaction__label {
+  margin-right: 2rem;
 }

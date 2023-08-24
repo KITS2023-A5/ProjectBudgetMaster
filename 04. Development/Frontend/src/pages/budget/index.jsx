@@ -7,9 +7,12 @@ import {
   Layout,
   Modal,
   Row,
+  Select,
   Space,
   Table,
+  Tag,
   Tooltip,
+  notification,
 } from "antd";
 import { Content } from "antd/es/layout/layout";
 import classNames from "classnames/bind";
@@ -18,25 +21,132 @@ import Footer from "../../layouts/footer";
 import Header from "../../layouts/header";
 import Sidebar from "../../layouts/sidebar";
 import styles from "./budget.module.scss";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "antd/es/form/Form";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  requestCreateBudget,
+  requestGetAllbudget,
+  requestUpdateBudget,
+} from "../../redux/slices/budgetSlice";
+import { unwrapResult } from "@reduxjs/toolkit";
+import { requestGetAllCategory } from "../../redux/slices/categorySlice";
+import dayjs from "dayjs";
+import moment from "moment/moment";
 
 const cx = classNames.bind(styles);
 
 const BudgetPage = () => {
   const [form] = useForm();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [budgetDatas, setBudgetDatas] = useState([]);
+  const [categoryDatas, setCategoryDatas] = useState([]);
+  const [valueEdit, setValueEdit] = useState();
+  const [isEdit, setIsEdit] = useState(false);
+
+  const dispatch = useDispatch();
+  const budgets = useSelector((state) => state.budget.budgets);
+  const loading = useSelector((state) => state.budget.loading);
 
   const showModal = () => {
     setIsModalOpen(true);
+    setValueEdit(undefined);
+    setIsEdit(false);
   };
 
   const handleOk = () => {
+    form.validateFields().then(async (value) => {
+      try {
+        // console.log({ value });
+        if (!isEdit) {
+          const data = await dispatch(
+            requestCreateBudget({
+              description: value.description,
+              amount: value.amount,
+              startDate: value.time,
+              endDate: value.time,
+              categoryId: value.category,
+            })
+          );
+          unwrapResult(data);
+        } else if (valueEdit.budgetId) {
+          const data = await dispatch(
+            requestUpdateBudget({
+              budgetId: valueEdit.budgetId,
+              categoryId: valueEdit.category.categoryId,
+              description: value.description,
+              amount: value.amount,
+              startDate: value.time,
+              endDate: value.time,
+            })
+          );
+          unwrapResult(data);
+        }
+
+        loadAllBudget();
+        handleCancel();
+
+        notification.success({
+          message: !isEdit ? "Created successfully" : " Updated successfully",
+          duration: 1.5,
+        });
+      } catch (error) {
+        notification.error({
+          message: "Created error",
+        });
+      }
+    });
+    setIsModalOpen(false);
+  };
+  const handleCancel = () => {
+    form.resetFields();
+    setValueEdit(undefined);
     setIsModalOpen(false);
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
+  useEffect(() => {
+    if (valueEdit) {
+      form.setFieldsValue({
+        time: moment(valueEdit.endDate),
+        category: valueEdit?.category.categoryId,
+        amount: valueEdit?.amount,
+        description: valueEdit?.description,
+      });
+      console.log(valueEdit);
+    }
+  }, [valueEdit]);
+
+  useEffect(() => {
+    loadAllBudget();
+    loadAllCategory();
+  }, []);
+
+  // useEffect(() => {
+  //   setBudgetDatas(budgets);
+  // }, [budgets]);
+
+  const loadAllBudget = async () => {
+    try {
+      const result = await dispatch(requestGetAllbudget());
+      const res = unwrapResult(result);
+      setBudgetDatas(res.map((e) => ({ ...e, key: e.budgetId })));
+    } catch (error) {
+      notification.error({
+        message: "No results",
+      });
+    }
+  };
+
+  const loadAllCategory = async () => {
+    try {
+      const result = await dispatch(requestGetAllCategory());
+      const res = unwrapResult(result);
+      setCategoryDatas(res.map((e) => ({ ...e })));
+    } catch (error) {
+      notification.error({
+        message: "Load category error",
+      });
+    }
   };
 
   const columns = [
@@ -44,25 +154,47 @@ const BudgetPage = () => {
       title: "Category",
       key: "category",
       dataIndex: "category",
+      ellipsis: true,
+      render: (_, record) => (
+        <>
+          <Tag
+            color={record.category.colorCode}
+            key={record.category.categoryId}
+          >
+            {record.category.name.toUpperCase()}
+          </Tag>
+        </>
+      ),
     },
     {
       title: "Description",
       key: "description",
       dataIndex: "description",
+      ellipsis: true,
+      responsive: ["md"],
     },
     {
       title: "Amount",
       dataIndex: "amount",
-      defaultSortOrder: ["descend", "ascend"],
+      key: "amount",
+      // defaultSortOrder: ["descend", "ascend"],
       sorter: (a, b) => a.amount - b.amount,
+      ellipsis: true,
     },
     {
       title: "Action",
       key: "action",
-      render: (_, record) => (
+      render: (text, record) => (
         <Space size="small">
           <Tooltip placement="top" title="Edit">
-            <Button className={cx("action__btn")} onClick={showModal}>
+            <Button
+              className={cx("action__btn")}
+              onClick={() => {
+                setIsModalOpen(true);
+                setValueEdit(text);
+                setIsEdit(true);
+              }}
+            >
               <FaPenToSquare className={cx("action__icon")} />
             </Button>
           </Tooltip>
@@ -73,27 +205,6 @@ const BudgetPage = () => {
           </Tooltip>
         </Space>
       ),
-    },
-  ];
-
-  const datas = [
-    {
-      key: "1",
-      category: "Food",
-      description: "",
-      amount: 100,
-    },
-    {
-      key: "2",
-      category: "Shopping",
-      description: "vcl",
-      amount: 50,
-    },
-    {
-      key: "3",
-      category: "Fee",
-      description: "",
-      amount: 100,
     },
   ];
 
@@ -176,10 +287,12 @@ const BudgetPage = () => {
                   <Table
                     className={cx("budgetpage__table")}
                     columns={columns}
-                    dataSource={datas}
-                    // loading={loading}
+                    dataSource={budgetDatas}
+                    loading={loading}
                     pagination={{
-                      pageSize: 5,
+                      pageSize: 13,
+                      total: budgets.length,
+                      // current: 1,
                     }}
                   />
                 </div>
@@ -192,7 +305,7 @@ const BudgetPage = () => {
       </div>
 
       <Modal
-        title="Budget"
+        title={isEdit ? "Edit Budget" : "Create Budget"}
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -203,12 +316,23 @@ const BudgetPage = () => {
               className={cx("budgetpage__datepicker")}
               format={"MM/YYYY"}
               picker="month"
-              style={{ padding: "12px", width: "100%" }}
+              style={{ width: "100%" }}
+              size="large"
             />
           </Form.Item>
 
           <Form.Item name="category" label="Category">
-            <Input placeholder="Enter username" style={{ padding: "12px" }} />
+            <Select size="large" style={{ width: "100%" }}>
+              {categoryDatas.map((item) => (
+                <Select.Option
+                  key={item.categoryId}
+                  value={item.categoryId}
+                  mode="tags"
+                >
+                  <Tag color={item.colorCode}>{item.name.toUpperCase()}</Tag>
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
 
           <Form.Item
@@ -221,14 +345,16 @@ const BudgetPage = () => {
               },
             ]}
           >
-            <Input placeholder="Enter amount" style={{ padding: "12px" }} />
+            <Input
+              placeholder="Enter amount"
+              size="large"
+              type="number"
+              min={0}
+            />
           </Form.Item>
 
           <Form.Item name="description" label="Description">
-            <Input
-              placeholder="Enter description"
-              style={{ padding: "12px" }}
-            />
+            <Input placeholder="Enter description" size="large" />
           </Form.Item>
         </Form>
       </Modal>

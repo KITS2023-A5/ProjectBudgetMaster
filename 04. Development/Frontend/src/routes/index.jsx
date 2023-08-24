@@ -13,24 +13,24 @@ import CustomerServicePage from "../admin/page/customerService";
 import CustomerBehaviorAnalyticsPage from "../admin/page/customerBehaviorAnalytics";
 import Category from "../admin/page/Category";
 
-// Public routers
+// Public routes
 export const publicRoutes = [
   { path: "/", component: HomePage },
-  { path: "/login", component: LoginPage },
-  { path: "/signup", component: SignupPage },
   { path: "/resetPassword", component: ResetPasswordPage },
-  { path: "/transaction", component: TransactionPage },
-  { path: "/budget", component: BudgetPage },
-  { path: "/statistic", component: StatisticPage },
-  { path: "/profile", component: ProfilePage },
-  { path: "*", component: NotFoundPage },
+  { path: "/signup", component: SignupPage },
+  { path: "/login", component: LoginPage },
   { path: "/admin", component: AdminHomePage},
   { path: "/admin/customerService", component: CustomerServicePage},
   { path: "/admin/customerBehaviorAnalytics", component: CustomerBehaviorAnalyticsPage},
   { path: "/admin/trackingUser", component: TrackingUserPage},
   { path: "/admin/category", component: Category},
-
+  { path: "*", component: NotFoundPage },
 ];
 
-// Private routes
-// export const privateRoutes = [{ path: "/profile", component: ProfilePage }];
+// Private routers
+export const privateRoutes = [
+  { path: "/transaction", component: TransactionPage },
+  { path: "/budget", component: BudgetPage },
+  { path: "/statistic", component: StatisticPage },
+  { path: "/profile", component: ProfilePage },
+];
