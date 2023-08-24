@@ -18,6 +18,11 @@ public interface BudgetRepository extends JpaRepository<Budget, Integer> {
 
     @Query("SELECT new com.example.kits.groupa.budgetmaster.payload.response.BudgetResponse(b.budgetId, b.description, b.amount, b.startDate, b.endDate, b.category, b.user.userId) " +
             "FROM Budget b " +
+            "WHERE b.budgetId = :budgetId AND b.user.userId = :userId")
+    Budget findByBudgetIdAndUserId(Integer budgetId, Long userId);
+
+    @Query("SELECT new com.example.kits.groupa.budgetmaster.payload.response.BudgetResponse(b.budgetId, b.description, b.amount, b.startDate, b.endDate, b.category, b.user.userId) " +
+            "FROM Budget b " +
             "WHERE b.user.userId = :userId AND b.category.categoryId = :categoryId")
     List<BudgetResponse> findBudgetsByCategory(Long userId, Integer categoryId, Pageable pageable);
 

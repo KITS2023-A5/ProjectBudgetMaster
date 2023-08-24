@@ -75,4 +75,13 @@ public class BudgetController {
 
         return ResponseEntity.ok(budgetService.updateBudget(userId, budgetId, budgetRequest));
     }
+
+    @PostMapping("/{budgetId}")
+    public ResponseEntity<?> deleteBudget(@RequestHeader("Authorization") String authorizationHeader,
+                                          @PathVariable Integer budgetId) {
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+        Long userId = jwtUtils.getUserIdFromJwtToken(token);
+        budgetService.deleteBudget(budgetId, userId);
+        return ResponseEntity.ok("Budget deleted");
+    }
 }

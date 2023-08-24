@@ -118,6 +118,7 @@ public class TransactionService {
         Transaction existingTransaction = transactionRepository.findByTransactionIdAndUserId(transactionId, userId);
         if (existingTransaction != null) {
             existingTransaction.setVisible(false);
+            transactionRepository.save(existingTransaction);
         }
     }
 }

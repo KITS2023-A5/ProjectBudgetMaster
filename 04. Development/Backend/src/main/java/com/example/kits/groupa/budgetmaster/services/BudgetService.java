@@ -39,6 +39,7 @@ public class BudgetService {
         budget.setEndDate(budgetRequest.getEndDate());
         budget.setCategory(category);
         budget.setUser(user);
+        budget.setVisible(true);
         budgetRepository.save(budget);
         return new BudgetResponse(budget.getBudgetId(), budget.getDescription(), budget.getAmount(), budget.getStartDate(), budget.getEndDate(), budget.getCategory(), budget.getUser().getUserId());
     }
@@ -76,5 +77,13 @@ public class BudgetService {
 
     public List<BudgetResponse> getBudgetsBetweenDates(Long userId, String startDate, String endDate, Pageable pageable){
         return budgetRepository.findBudgetsBetweenDates(userId, startDate, endDate, pageable);
+    }
+
+    public void deleteBudget(Integer budgetId, Long userId){
+        Budget budget = budgetRepository.findByBudgetIdAndUserId(budgetId, userId);
+        if(budget != null){
+            budget.setVisible(false);
+            budgetRepository.save(budget);
+        }
     }
 }
