@@ -17,7 +17,7 @@ public interface BudgetRepository extends JpaRepository<Budget, Integer> {
             "WHERE b.user.userId = :userId AND b.visible=true")
     Page<BudgetResponse> findBudgetsByUserId(Long userId, Pageable pageable);
 
-    @Query("SELECT new com.example.kits.groupa.budgetmaster.payload.response.BudgetResponse(b.budgetId, b.description, b.amount, b.startDate, b.endDate, b.category, b.user.userId) " +
+    @Query("SELECT b " +
             "FROM Budget b " +
             "WHERE b.budgetId = :budgetId AND b.user.userId = :userId")
     Budget findByBudgetIdAndUserId(Integer budgetId, Long userId);
