@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -41,7 +42,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    private Date dob;
+    private LocalDate dob;
 
     private String activationToken;
 
@@ -51,7 +52,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    public User(String name, String password, String username, String email, String phone, Gender gender, Date dob) {
+    public User(String name, String password, String username, String email, String phone, Gender gender, LocalDate dob) {
         this.name = name;
         this.password = password;
         this.username = username;

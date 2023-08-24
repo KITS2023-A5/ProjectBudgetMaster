@@ -6,6 +6,7 @@ import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -18,6 +19,6 @@ public class UserInfo {
     private byte[] image;
     private Currency currency;
     private Gender gender;
-    private Date dob;
+    private LocalDate dob;
     private String phone;
 }

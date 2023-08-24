@@ -56,11 +56,14 @@ public class UserService {
             // Update the relevant properties from the DTO
             if (updateUserDto.getName() != null)
                 user.setName(updateUserDto.getName());
-            if (updateUserDto.getUsername() != null)
-                user.setUsername(updateUserDto.getUsername());
+            if (updateUserDto.getPhoneNumber() != null)
+                user.setUsername(updateUserDto.getPhoneNumber());
             if (updateUserDto.getCurrency() != null)
                 user.setCurrency(updateUserDto.getCurrency());
-
+            if(updateUserDto.getGender() != null)
+                user.setGender(updateUserDto.getGender());
+            if(updateUserDto.getDob() != null)
+                user.setDob(updateUserDto.getDob());
             // Save the updated user to the database
             userRepository.save(user);
 
