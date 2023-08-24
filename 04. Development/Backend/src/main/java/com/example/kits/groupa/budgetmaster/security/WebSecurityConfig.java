@@ -71,7 +71,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                                 .requestMatchers("/**").permitAll()
                                 .anyRequest().authenticated()
                 );
-
+        http.cors();
         http.authenticationProvider(authenticationProvider());
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

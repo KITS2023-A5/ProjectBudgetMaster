@@ -4,6 +4,7 @@ import com.example.kits.groupa.budgetmaster.entities.Budget;
 import com.example.kits.groupa.budgetmaster.entities.Category;
 import com.example.kits.groupa.budgetmaster.entities.User;
 import com.example.kits.groupa.budgetmaster.payload.request.BudgetRequest;
+import com.example.kits.groupa.budgetmaster.payload.request.DateRequest;
 import com.example.kits.groupa.budgetmaster.payload.response.BudgetResponse;
 import com.example.kits.groupa.budgetmaster.payload.response.TransactionResponseWrapper;
 import com.example.kits.groupa.budgetmaster.repositories.BudgetRepository;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -84,7 +86,9 @@ public class BudgetService {
         return new TransactionResponseWrapper(totalCount, budgets);
     }
 
-    public TransactionResponseWrapper getBudgetsBetweenDates(Long userId, String startDate, String endDate, Pageable pageable){
+    public TransactionResponseWrapper getBudgetsBetweenDates(Long userId, DateRequest date, Pageable pageable){
+        Date startDate = date.getStartDate();
+        Date endDate = date.getEndDate();
         List<BudgetResponse> budgets = budgetRepository.findBudgetsBetweenDates(userId, startDate, endDate, pageable).getContent();
         Long totalCount = budgetRepository.count();
         return new TransactionResponseWrapper(totalCount, budgets);
