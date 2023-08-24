@@ -12,17 +12,69 @@ import {
   Layout,
   Row,
   Select,
+  Space,
+  Table,
+  Tooltip,
 } from "antd";
 import Sidebar from "../../layouts/sidebar";
 import Header from "../../layouts/header";
 import { useForm } from "antd/es/form/Form";
 import { TRANSACTION_TYPE } from "../../constants";
 import Upload from "antd/es/upload/Upload";
+import { FaPenToSquare, FaTrashCan } from "react-icons/fa6";
+import moment from "moment";
 
 const cx = classNames.bind(styles);
 
 const TransactionPage = () => {
   const [form] = useForm();
+
+  const columns = [
+    {
+      title: "Type",
+      key: "type",
+      dataIndex: "type",
+      ellipsis: true,
+    },
+    {
+      title: "Category",
+      key: "category",
+      dataIndex: "category",
+      ellipsis: true,
+    },
+    {
+      title: "Amount",
+      dataIndex: "amount",
+      defaultSortOrder: ["descend", "ascend"],
+      sorter: (a, b) => a.amount - b.amount,
+      ellipsis: true,
+    },
+    {
+      title: "Date",
+      dataIndex: "date",
+      defaultSortOrder: ["descend", "ascend"],
+      sorter: (a, b) => a.date - b.date,
+      ellipsis: true,
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (_, record) => (
+        <Space size="small">
+          <Tooltip placement="top" title="Edit">
+            <Button className={cx("action__btn")} onClick={showModal}>
+              <FaPenToSquare className={cx("action__icon")} />
+            </Button>
+          </Tooltip>
+          <Tooltip placement="top" title="Delete">
+            <Button className={cx("action__btn")}>
+              <FaTrashCan className={cx("action__icon")} />
+            </Button>
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ];
 
   return (
     <>
@@ -42,7 +94,7 @@ const TransactionPage = () => {
                     <Col span={24}>
                       <Card
                         title={"Create transaction"}
-                        className={cx("transaction__card")}
+                        className={cx("transaction__card", "card__top")}
                       >
                         <Form
                           form={form}
@@ -172,6 +224,31 @@ const TransactionPage = () => {
                             </Col>
                           </Row>
                         </Form>
+                      </Card>
+
+                      <Card
+                        title={"Transaction"}
+                        className={cx("transaction__card")}
+                      >
+                        <div className={cx("transaction__dateselect")}>
+                          <div className={cx("transaction__label")}>Time:</div>
+                          <DatePicker.RangePicker
+                            format={"DD/MM/YYYY"}
+                            size="large"
+                            disabledDate={(current) => {
+                              return current && current > moment().endOf("day");
+                            }}
+                          />
+                        </div>
+                        <Table
+                          className={cx("transaction__table")}
+                          columns={columns}
+                          // dataSource={datas}
+                          pagination={{
+                            pageSize: 5,
+                          }}
+                          scroll={{ x: 500 }}
+                        />
                       </Card>
                     </Col>
                   </Row>

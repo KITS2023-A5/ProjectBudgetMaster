@@ -28,7 +28,7 @@ const cx = classNames.bind(styles);
 export const GENDERS = [
   {
     label: "Male",
-    value: 0,
+    value: "MALE",
     icon: (
       <FaMars
         className={cx("site-form-item-icon input__icon")}
@@ -41,7 +41,7 @@ export const GENDERS = [
   },
   {
     label: "Female",
-    value: 1,
+    value: "FEMALE",
     icon: (
       <FaVenus
         className={cx("site-form-item-icon input__icon")}
@@ -54,7 +54,7 @@ export const GENDERS = [
   },
   {
     label: "Other",
-    value: 2,
+    value: "UNKNOWN",
     icon: (
       <FaMarsAndVenus
         className={cx("site-form-item-icon input__icon")}

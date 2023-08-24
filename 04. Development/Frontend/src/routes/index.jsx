@@ -8,18 +8,19 @@ import SignupPage from "../pages/signup";
 import TransactionPage from "../pages/transaction";
 import StatisticPage from "../pages/statistic";
 
-// Public routers
+// Public routes
 export const publicRoutes = [
   { path: "/", component: HomePage },
-  { path: "/login", component: LoginPage },
-  { path: "/signup", component: SignupPage },
   { path: "/resetPassword", component: ResetPasswordPage },
+  { path: "/signup", component: SignupPage },
+  { path: "/login", component: LoginPage },
+  { path: "*", component: NotFoundPage },
+];
+
+// Private routers
+export const privateRoutes = [
   { path: "/transaction", component: TransactionPage },
   { path: "/budget", component: BudgetPage },
   { path: "/statistic", component: StatisticPage },
   { path: "/profile", component: ProfilePage },
-  { path: "*", component: NotFoundPage },
 ];
-
-// Private routes
-// export const privateRoutes = [{ path: "/profile", component: ProfilePage }];

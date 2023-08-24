@@ -2,6 +2,10 @@
 
 .budgetpage__wrapper {
   padding: 4rem;
+
+  @include responsive(xs) {
+    padding: 4rem 1rem;
+  }
 }
 
 .budgetpage__title {

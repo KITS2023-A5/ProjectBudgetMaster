@@ -2,29 +2,41 @@ import axios from "axios";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { PubSub } from "pubsub-js";
-// const baseURL = process.env.ENDPOINT_BASE_URL;
+import Cookies from "js-cookie";
 
-const baseURL = "http://127.0.0.1:3000/api/v1/users";
+// import dotenv from "dotenv";
+// dotenv.config();
+
+// const ENDPOINT = process.env.APP_ENDPOINT;
+// const PREFIX = process.env.APP_PREFIX;
+// const ENDPOINT = import.meta.env.VITE_APP_ENDPOINT;
+// const PREFIX = import.meta.env.VITE_APP_PREFIX;
+// console.log(ENDPOINT);
+
+// const baseURL = "http://45.117.179.168:8080/api";
+const baseURL = "http://localhost:8080/api";
+// const baseURL = `${ENDPOINT}/${PREFIX}`;
 
 const axiosInstance = axios.create({ baseURL });
+// axiosInstance.defaults.withCredentials = true;
 
-export const setAccessToken = (token) => {
-  accessToken = token;
-};
+// axiosInstance.interceptors.request.use(
+//   function (config) {
+//     config.headers.Authorization = `Bearer ${accessToken}`;
+//     return config;
+//   },
+//   function (error) {
+//     return Promise.reject(error);
+//   }
+// );
 
 axiosInstance.interceptors.request.use(
   function (config) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
+    const accessToken = Cookies.get("token");
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
     return config;
-  },
-  function (error) {
-    return Promise.reject(error);
-  }
-);
-
-axiosInstance.interceptors.response.use(
-  function (response) {
-    return response;
   },
   function (error) {
     return Promise.reject(error);
@@ -37,11 +49,10 @@ axiosInstance.interceptors.response.use(
   },
   (err) => {
     const statusCode = err?.response?.status;
-    console.log("res axios instance");
-    // if (statusCode === 401) {
-    PubSub.publish("FORCE_LOGIN");
-    // }
-
+    if (statusCode !== 200) {
+      // console.log("FORCE_LOGIN");
+      PubSub.publish("FORCE_LOGIN");
+    }
     return err?.response;
   }
 );
@@ -49,10 +60,6 @@ axiosInstance.interceptors.response.use(
 let accessToken = "";
 export const useAxios = () => {
   const navigation = useNavigate();
-  // const { data: session } = useSession();
-  // cookie
-  console.log("useAxios");
-
   useEffect(() => {
     const token = PubSub.subscribe("FORCE_LOGIN", () => {
       navigation("/login");
@@ -62,9 +69,11 @@ export const useAxios = () => {
     };
   }, []);
 
-  // useEffect(() => {
-  //   // accessToken = session?.accessToken;
-  // }, [session?.accessToken]);
+  let token = Cookies.get("token");
+
+  useEffect(() => {
+    accessToken = Cookies.get("token");
+  }, [token]);
 };
 
 export default axiosInstance;
