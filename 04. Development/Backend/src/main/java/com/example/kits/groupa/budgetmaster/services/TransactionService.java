@@ -118,48 +118,7 @@ public class TransactionService {
         Transaction existingTransaction = transactionRepository.findByTransactionIdAndUserId(transactionId, userId);
         if (existingTransaction != null) {
             existingTransaction.setVisible(false);
+            transactionRepository.save(existingTransaction);
         }
-    }
-
-    public List<ExpenseStatistics> getExpenseDaily(Long userId){
-        List<Object[]> results = transactionRepository.findExpenseByUserDaily(userId);
-        return getExpenseStatistics(results);
-    }
-
-    public List<ExpenseStatistics> getExpenseWeekly(Long userId){
-        List<Object[]> results = transactionRepository.findExpenseByUserWeekly(userId);
-        return getExpenseStatistics(results);
-    }
-
-    public List<ExpenseStatistics> getExpenseMonthly(Long userId){
-        List<Object[]> results = transactionRepository.findExpenseByUserMonthly(userId);
-        return getExpenseStatistics(results);
-    }
-
-    public List<ExpenseStatistics> getExpenseYearly(Long userId){
-        List<Object[]> results = transactionRepository.findExpenseByUserYearly(userId);
-        return getExpenseStatistics(results);
-    }
-
-    public List<ExpenseStatistics> getExpenseLastXDays(Long userId, int X){
-        List<Object[]> results = transactionRepository.findExpenseByUserLastXDays(userId, X);
-        return getExpenseStatistics(results);
-    }
-
-    private List<ExpenseStatistics> getExpenseStatistics(List<Object[]> results) {
-        List<ExpenseStatistics> expenseStatisticsList = new ArrayList<>();
-
-        for (Object[] result : results) {
-            String timePeriod = (String) result[0];
-            Double expense = (Double) result[1];
-
-            ExpenseStatistics expenseStatistics = new ExpenseStatistics();
-            expenseStatistics.setTimePeriod(timePeriod);
-            expenseStatistics.setExpense(expense);
-
-            expenseStatisticsList.add(expenseStatistics);
-        }
-
-        return expenseStatisticsList;
     }
 }

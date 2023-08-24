@@ -39,11 +39,12 @@ public class BudgetService {
         budget.setEndDate(budgetRequest.getEndDate());
         budget.setCategory(category);
         budget.setUser(user);
+        budget.setVisible(true);
         budgetRepository.save(budget);
         return new BudgetResponse(budget.getBudgetId(), budget.getDescription(), budget.getAmount(), budget.getStartDate(), budget.getEndDate(), budget.getCategory(), budget.getUser().getUserId());
     }
 
-    public String updateBudget(Long userId, Integer budgetId, BudgetRequest budgetRequest){
+    public BudgetResponse updateBudget(Long userId, Integer budgetId, BudgetRequest budgetRequest){
         Budget budget = budgetRepository.findById(budgetId)
                 .orElseThrow(() -> new IllegalArgumentException("Budget not found"));
         if (!Objects.equals(budget.getUser().getUserId(), userId)) {
@@ -57,8 +58,10 @@ public class BudgetService {
         budget.setEndDate(budgetRequest.getEndDate());
         budget.setCategory(category);
         budgetRepository.save(budget);
-        return "Budget updated";
+        return new BudgetResponse(budget.getBudgetId(), budget.getDescription(), budget.getAmount(), budget.getStartDate(), budget.getEndDate(), budget.getCategory(), budget.getUser().getUserId());
     }
+
+
 
     public List<BudgetResponse> getBudgetsByUserId(Long userId, Pageable pageable){
         return budgetRepository.findBudgetsByUserId(userId, pageable);
@@ -74,5 +77,13 @@ public class BudgetService {
 
     public List<BudgetResponse> getBudgetsBetweenDates(Long userId, String startDate, String endDate, Pageable pageable){
         return budgetRepository.findBudgetsBetweenDates(userId, startDate, endDate, pageable);
+    }
+
+    public void deleteBudget(Integer budgetId, Long userId){
+        Budget budget = budgetRepository.findByBudgetIdAndUserId(budgetId, userId);
+        if(budget != null){
+            budget.setVisible(false);
+            budgetRepository.save(budget);
+        }
     }
 }

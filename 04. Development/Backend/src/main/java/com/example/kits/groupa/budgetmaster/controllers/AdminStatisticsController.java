@@ -15,7 +15,6 @@ public class AdminStatisticsController {
     private final JwtUtils jwtUtils;
     private final AdminStatisticsService adminStatisticsService;
 
-
     @Autowired
     public AdminStatisticsController(JwtUtils jwtUtils, AdminStatisticsService adminStatisticsService){
         this.jwtUtils = jwtUtils;

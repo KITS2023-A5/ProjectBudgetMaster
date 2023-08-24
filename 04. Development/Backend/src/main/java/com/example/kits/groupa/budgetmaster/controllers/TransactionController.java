@@ -132,50 +132,11 @@ public class TransactionController {
         }
     }
 
-    @GetMapping("/statistics/daily")
-    public ResponseEntity<List<ExpenseStatistics>> getExpenseDailyStatistics(@RequestHeader("Authorization") String authorizationHeader){
+    @PostMapping ("/{transactionId}")
+    public ResponseEntity<String> deleteTransaction(@RequestHeader("Authorization") String authorizationHeader, @PathVariable int transactionId) {
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        List<ExpenseStatistics> statistics = transactionService.getExpenseDaily(userId);
-        return new ResponseEntity<>(statistics, HttpStatus.OK);
+        transactionService.deleteTransaction(userId, transactionId);
+        return new ResponseEntity<>("Transaction deleted successfully", HttpStatus.OK);
     }
-
-    @GetMapping("/statistics/weekly")
-    public ResponseEntity<List<ExpenseStatistics>> getExpenseWeeklyStatistics(@RequestHeader("Authorization") String authorizationHeader){
-        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
-        Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        List<ExpenseStatistics> statistics = transactionService.getExpenseWeekly(userId);
-        return new ResponseEntity<>(statistics, HttpStatus.OK);
-    }
-
-    @GetMapping("/statistics/monthly")
-    public ResponseEntity<List<ExpenseStatistics>> getExpenseMonthlyStatistics(@RequestHeader("Authorization") String authorizationHeader){
-        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
-        Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        List<ExpenseStatistics> statistics = transactionService.getExpenseMonthly(userId);
-        return new ResponseEntity<>(statistics, HttpStatus.OK);
-    }
-
-    @GetMapping("/statistics/yearly")
-    public ResponseEntity<List<ExpenseStatistics>> getExpenseYearlyStatistics(@RequestHeader("Authorization") String authorizationHeader){
-        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
-        Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        List<ExpenseStatistics> statistics = transactionService.getExpenseYearly(userId);
-        return new ResponseEntity<>(statistics, HttpStatus.OK);
-    }
-
-    @GetMapping("/statistics/last-x-days/{X}")
-    public ResponseEntity<List<ExpenseStatistics>> getExpenseLastXDaysStatistics(@RequestHeader("Authorization") String authorizationHeader, @PathVariable int X){
-        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
-        Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        List<ExpenseStatistics> statistics = transactionService.getExpenseLastXDays(userId, X);
-        return new ResponseEntity<>(statistics, HttpStatus.OK);
-    }
-//    @DeleteMapping("/{transactionId}")
-//    public ResponseEntity<Void> deleteTransaction(@RequestHeader("Authorization") String authorizationHeader, @PathVariable int transactionId) {
-//        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
-//        Long userId = jwtUtils.getUserIdFromJwtToken(token);
-//        transactionService.deleteTransaction(userId, transactionId);
-//        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//    }
 }

@@ -93,12 +93,49 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
             "ORDER BY timePeriod DESC", nativeQuery = true)
     List<Object[]> findExpenseByUserYearly(Long userId);
 
-    @Query(value = "SELECT DATE_FORMAT(created_time, '%d-%m-%Y') as timePeriod, sum(amount) as expense FROM transaction " +
-            "WHERE user_id = :userId AND type='EXPENSE' AND created_time>date_sub(now(), interval :X DAY) AND visible=true"+
+    @Query(value = "SELECT DATE_FORMAT(created_time, '%d-%m-%Y') as timePeriod, sum(amount) as expense FROM transaction t" +
+            "WHERE t.user_id = :userId AND type='EXPENSE' AND created_time>date_sub(now(), interval :X DAY) AND t.visible=true"+
             "group by DATE_FORMAT(created_time, '%d-%m-%Y') "+
             "order by timePeriod desc "
             , nativeQuery = true)
     List<Object[]> findExpenseByUserLastXDays(Long userId, int X);
+
+    @Query(value = "SELECT DATE_FORMAT(created_time, '%d-%m-%Y') as timePeriod, sum(amount) as income FROM transaction t " +
+            "JOIN category c ON t.category_id = c.category_id " +
+            "WHERE t.user_id = :userId AND c.type = 'INCOME' AND t.visible = true " +
+            "group by DATE_FORMAT(created_time, '%d-%m-%Y') "+
+            "order by timePeriod desc "
+            , nativeQuery = true)
+    List<Object[]> findIncomeByUserDaily(Long userId);
+
+    @Query(value = "SELECT DATE_FORMAT(created_time, '%V-%X') as timePeriod, sum(amount) as income FROM transaction t " +
+            "JOIN category c ON t.category_id = c.category_id " +
+            "WHERE t.user_id = :userId AND c.type = 'INCOME' AND t.visible = true " +
+            "group by DATE_FORMAT(created_time, '%V-%X') "+
+            "order by timePeriod desc "
+            , nativeQuery = true)
+    List<Object[]> findIncomeByUserWeekly(Long userId);
+
+    @Query(value = "SELECT DATE_FORMAT(t.created_time, '%m-%Y') AS timePeriod, SUM(t.amount) AS income FROM transaction t " +
+            "JOIN category c ON t.category_id = c.category_id " +
+            "WHERE t.user_id = :userId AND c.type = 'INCOME' AND t.visible = true " +
+            "GROUP BY DATE_FORMAT(t.created_time, '%m-%Y') " +
+            "ORDER BY timePeriod DESC", nativeQuery = true)
+    List<Object[]> findIncomeByUserMonthly(Long userId);
+
+    @Query(value = "SELECT DATE_FORMAT(t.created_time, '%Y') AS timePeriod, SUM(t.amount) AS income FROM transaction t " +
+            "JOIN category c ON t.category_id = c.category_id " +
+            "WHERE t.user_id = :userId AND c.type = 'INCOME' AND t.visible = true " +
+            "GROUP BY DATE_FORMAT(t.created_time, '%Y') " +
+            "ORDER BY timePeriod DESC", nativeQuery = true)
+    List<Object[]> findIncomeByUserYearly(Long userId);
+
+    @Query(value = "SELECT DATE_FORMAT(created_time, '%d-%m-%Y') as timePeriod, sum(amount) as expense FROM transaction t" +
+            "WHERE t.user_id = :userId AND type='INCOME' AND created_time>date_sub(now(), interval :X DAY) AND t.visible=true"+
+            "group by DATE_FORMAT(created_time, '%d-%m-%Y') "+
+            "order by timePeriod desc "
+            , nativeQuery = true)
+    List<Object[]> findIncomeByUserLastXDays(Long userId, int X);
 
     @Query("SELECT t.user.userId, t.user.username, SUM(CASE WHEN t.category.type = 'INCOME' THEN t.amount ELSE 0 END) AS income, " +
             "SUM(CASE WHEN t.category.type = 'EXPENSE' THEN t.amount ELSE 0 END) AS expense " +
