@@ -14,7 +14,7 @@ import java.util.List;
 public interface BudgetRepository extends JpaRepository<Budget, Integer> {
     @Query("SELECT new com.example.kits.groupa.budgetmaster.payload.response.BudgetResponse(b.budgetId, b.description, b.amount, b.startDate, b.endDate, b.category, b.user.userId) " +
             "FROM Budget b " +
-            "WHERE b.user.userId = :userId")
+            "WHERE b.user.userId = :userId AND b.visible=true")
     Page<BudgetResponse> findBudgetsByUserId(Long userId, Pageable pageable);
 
     @Query("SELECT new com.example.kits.groupa.budgetmaster.payload.response.BudgetResponse(b.budgetId, b.description, b.amount, b.startDate, b.endDate, b.category, b.user.userId) " +
@@ -24,16 +24,16 @@ public interface BudgetRepository extends JpaRepository<Budget, Integer> {
 
     @Query("SELECT new com.example.kits.groupa.budgetmaster.payload.response.BudgetResponse(b.budgetId, b.description, b.amount, b.startDate, b.endDate, b.category, b.user.userId) " +
             "FROM Budget b " +
-            "WHERE b.user.userId = :userId AND b.category.categoryId = :categoryId")
+            "WHERE b.user.userId = :userId AND b.category.categoryId = :categoryId AND b.visible=true")
     Page<BudgetResponse> findBudgetsByCategory(Long userId, Integer categoryId, Pageable pageable);
 
     @Query("SELECT new com.example.kits.groupa.budgetmaster.payload.response.BudgetResponse(b.budgetId, b.description, b.amount, b.startDate, b.endDate, b.category, b.user.userId) " +
             "FROM Budget b " +
-            "WHERE b.user.userId = :userId AND b.category.name LIKE %:categoryName%")
+            "WHERE b.user.userId = :userId AND b.category.name LIKE %:categoryName% AND b.visible=true")
     Page<BudgetResponse> findBudgetsByCategoryName(Long userId, String categoryName, Pageable pageable);
 
     @Query("SELECT new com.example.kits.groupa.budgetmaster.payload.response.BudgetResponse(b.budgetId, b.description, b.amount, b.startDate, b.endDate, b.category, b.user.userId) " +
             "FROM Budget b " +
-            "WHERE b.user.userId = :userId AND b.startDate >= :startDate AND b.endDate <= :endDate")
+            "WHERE b.user.userId = :userId AND b.startDate >= :startDate AND b.endDate <= :endDate AND b.visible=true")
     Page<BudgetResponse> findBudgetsBetweenDates(Long userId, String startDate, String endDate, Pageable pageable);
 }
