@@ -57,7 +57,7 @@ public class UserService {
             if (updateUserDto.getName() != null)
                 user.setName(updateUserDto.getName());
             if (updateUserDto.getPhoneNumber() != null)
-                user.setUsername(updateUserDto.getPhoneNumber());
+                user.setPhone(updateUserDto.getPhoneNumber());
             if (updateUserDto.getCurrency() != null)
                 user.setCurrency(updateUserDto.getCurrency());
             if(updateUserDto.getGender() != null)
