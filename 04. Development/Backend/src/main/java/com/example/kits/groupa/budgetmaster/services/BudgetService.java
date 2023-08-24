@@ -5,9 +5,11 @@ import com.example.kits.groupa.budgetmaster.entities.Category;
 import com.example.kits.groupa.budgetmaster.entities.User;
 import com.example.kits.groupa.budgetmaster.payload.request.BudgetRequest;
 import com.example.kits.groupa.budgetmaster.payload.response.BudgetResponse;
+import com.example.kits.groupa.budgetmaster.payload.response.TransactionResponseWrapper;
 import com.example.kits.groupa.budgetmaster.repositories.BudgetRepository;
 import com.example.kits.groupa.budgetmaster.repositories.CategoryRepository;
 import com.example.kits.groupa.budgetmaster.repositories.UserRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -39,11 +41,12 @@ public class BudgetService {
         budget.setEndDate(budgetRequest.getEndDate());
         budget.setCategory(category);
         budget.setUser(user);
+        budget.setVisible(true);
         budgetRepository.save(budget);
         return new BudgetResponse(budget.getBudgetId(), budget.getDescription(), budget.getAmount(), budget.getStartDate(), budget.getEndDate(), budget.getCategory(), budget.getUser().getUserId());
     }
 
-    public String updateBudget(Long userId, Integer budgetId, BudgetRequest budgetRequest){
+    public BudgetResponse updateBudget(Long userId, Integer budgetId, BudgetRequest budgetRequest){
         Budget budget = budgetRepository.findById(budgetId)
                 .orElseThrow(() -> new IllegalArgumentException("Budget not found"));
         if (!Objects.equals(budget.getUser().getUserId(), userId)) {
@@ -57,22 +60,41 @@ public class BudgetService {
         budget.setEndDate(budgetRequest.getEndDate());
         budget.setCategory(category);
         budgetRepository.save(budget);
-        return "Budget updated";
+        return new BudgetResponse(budget.getBudgetId(), budget.getDescription(), budget.getAmount(), budget.getStartDate(), budget.getEndDate(), budget.getCategory(), budget.getUser().getUserId());
     }
 
-    public List<BudgetResponse> getBudgetsByUserId(Long userId, Pageable pageable){
-        return budgetRepository.findBudgetsByUserId(userId, pageable);
+
+
+    public TransactionResponseWrapper getBudgetsByUserId(Long userId, Pageable pageable){
+        Page<BudgetResponse> budgetsPage = budgetRepository.findBudgetsByUserId(userId, pageable);
+        List<BudgetResponse> budgets = budgetsPage.getContent();
+        Long totalCount = budgetsPage.getTotalElements();
+        return new TransactionResponseWrapper(totalCount, budgets);
     }
 
-    public List<BudgetResponse> getBudgetsByCategory(Long userId, Integer categoryId, Pageable pageable){
-        return budgetRepository.findBudgetsByCategory(userId, categoryId, pageable);
+    public TransactionResponseWrapper getBudgetsByCategory(Long userId, Integer categoryId, Pageable pageable){
+        List<BudgetResponse> budgets = budgetRepository.findBudgetsByCategory(userId, categoryId, pageable).getContent();
+        Long totalCount = budgetRepository.count();
+        return new TransactionResponseWrapper(totalCount, budgets);
     }
 
-    public List<BudgetResponse> getBudgetsByCategoryName(Long userId, String categoryName, Pageable pageable){
-        return budgetRepository.findBudgetsByCategoryName(userId, categoryName, pageable);
+    public TransactionResponseWrapper getBudgetsByCategoryName(Long userId, String categoryName, Pageable pageable){
+        List<BudgetResponse> budgets = budgetRepository.findBudgetsByCategoryName(userId, categoryName, pageable).getContent();
+        Long totalCount = budgetRepository.count();
+        return new TransactionResponseWrapper(totalCount, budgets);
     }
 
-    public List<BudgetResponse> getBudgetsBetweenDates(Long userId, String startDate, String endDate, Pageable pageable){
-        return budgetRepository.findBudgetsBetweenDates(userId, startDate, endDate, pageable);
+    public TransactionResponseWrapper getBudgetsBetweenDates(Long userId, String startDate, String endDate, Pageable pageable){
+        List<BudgetResponse> budgets = budgetRepository.findBudgetsBetweenDates(userId, startDate, endDate, pageable).getContent();
+        Long totalCount = budgetRepository.count();
+        return new TransactionResponseWrapper(totalCount, budgets);
+    }
+
+    public void deleteBudget(Integer budgetId, Long userId){
+        Budget budget = budgetRepository.findByBudgetIdAndUserId(budgetId, userId);
+        if(budget != null){
+            budget.setVisible(false);
+            budgetRepository.save(budget);
+        }
     }
 }

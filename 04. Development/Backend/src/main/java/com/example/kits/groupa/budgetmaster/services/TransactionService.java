@@ -10,10 +10,12 @@ import com.example.kits.groupa.budgetmaster.payload.request.TransactionRequest;
 import com.example.kits.groupa.budgetmaster.payload.request.TransactionUpdateRequest;
 import com.example.kits.groupa.budgetmaster.payload.response.ExpenseStatistics;
 import com.example.kits.groupa.budgetmaster.payload.response.TransactionInfo;
+import com.example.kits.groupa.budgetmaster.payload.response.TransactionResponse;
 import com.example.kits.groupa.budgetmaster.payload.response.UserIncomeResponse;
 import com.example.kits.groupa.budgetmaster.repositories.*;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -42,12 +44,20 @@ public class TransactionService {
         this.userRepository = userRepository;
     }
 
-    public List<TransactionProjection> getTransactionsByUser(Long userId, Pageable pageable) {
-        return transactionRepository.findByUserId(userId, pageable);
+    public TransactionResponse getTransactionsByUser(Long userId, Pageable pageable) {
+        Page<TransactionProjection> transactionsPage = transactionRepository.findByUserId(userId, pageable);
+        List<TransactionProjection> transactions = transactionsPage.getContent();
+        long totalCount = transactionsPage.getTotalElements();
+
+        return new TransactionResponse(totalCount, transactions);
     }
 
-    public List<TransactionProjection> getTransactionsByType(Type type, Long userId, Pageable pageable) {
-        return transactionRepository.findTransactionByType(type, userId, pageable);
+    public TransactionResponse getTransactionsByType(Type type, Long userId, Pageable pageable) {
+        Page<TransactionProjection> transactionsPage = transactionRepository.findTransactionByType(type, userId, pageable);
+        List<TransactionProjection> transactions = transactionsPage.getContent();
+        long totalCount = transactionsPage.getTotalElements();
+
+        return new TransactionResponse(totalCount, transactions);
     }
 
     public TransactionInfo createTransaction(Long userId, TransactionRequest transactionRequest, MultipartFile receiptFile) throws IOException {
@@ -74,12 +84,20 @@ public class TransactionService {
     }
 
 
-    public List<TransactionProjection> getTransactionsByCategoryName(String category, Long userId, Pageable pageable) {
-        return transactionRepository.findAllByCategoryName(category, userId, pageable);
+    public TransactionResponse getTransactionsByCategoryName(String category, Long userId, Pageable pageable) {
+        Page<TransactionProjection> transactionsPage = transactionRepository.findAllByCategoryName(category, userId, pageable);
+        List<TransactionProjection> transactions = transactionsPage.getContent();
+        long totalCount = transactionsPage.getTotalElements();
+
+        return new TransactionResponse(totalCount, transactions);
     }
 
-    public List<TransactionProjection> getTransactionsByCategory(int categoryId, Long userId, Pageable pageable) {
-        return transactionRepository.findAllByCategory(categoryId, userId, pageable);
+    public TransactionResponse getTransactionsByCategory(int categoryId, Long userId, Pageable pageable) {
+        Page<TransactionProjection> transactionsPage = transactionRepository.findAllByCategory(categoryId, userId, pageable);
+        List<TransactionProjection> transactions = transactionsPage.getContent();
+        long totalCount = transactionsPage.getTotalElements();
+
+        return new TransactionResponse(totalCount, transactions);
     }
 
     public TransactionInfo updateTransaction(Long userId, int transactionId, TransactionUpdateRequest request) {
@@ -106,60 +124,27 @@ public class TransactionService {
         }
     }
 
-    public List<TransactionProjection> getTransactionsBetweenDates(LocalDateTime startDate, LocalDateTime endDate, Long userId, Pageable pageable) {
-        return transactionRepository.findAllBetweenDates(startDate, endDate, userId, pageable);
+    public TransactionResponse getTransactionsBetweenDates(LocalDateTime startDate, LocalDateTime endDate, Long userId, Pageable pageable) {
+        Page<TransactionProjection> transactionsPage = transactionRepository.findAllBetweenDates(startDate, endDate, userId, pageable);
+        List<TransactionProjection> transactions = transactionsPage.getContent();
+        long totalCount = transactionsPage.getTotalElements();
+
+        return new TransactionResponse(totalCount, transactions);
     }
 
-    public List<TransactionProjection> getAllExpenseByUser(Long userId) {
-        return transactionRepository.findAllExpenseByUserId(userId);
+    public TransactionResponse getAllExpenseByUser(Long userId, Pageable pageable) {
+        Page<TransactionProjection> transactionsPage = transactionRepository.findAllExpenseByUserId(userId, pageable);
+        List<TransactionProjection> transactions = transactionsPage.getContent();
+        long totalCount = transactionsPage.getTotalElements();
+
+        return new TransactionResponse(totalCount, transactions);
     }
 
     public void deleteTransaction(Long userId, int transactionId) {
         Transaction existingTransaction = transactionRepository.findByTransactionIdAndUserId(transactionId, userId);
         if (existingTransaction != null) {
             existingTransaction.setVisible(false);
+            transactionRepository.save(existingTransaction);
         }
-    }
-
-    public List<ExpenseStatistics> getExpenseDaily(Long userId){
-        List<Object[]> results = transactionRepository.findExpenseByUserDaily(userId);
-        return getExpenseStatistics(results);
-    }
-
-    public List<ExpenseStatistics> getExpenseWeekly(Long userId){
-        List<Object[]> results = transactionRepository.findExpenseByUserWeekly(userId);
-        return getExpenseStatistics(results);
-    }
-
-    public List<ExpenseStatistics> getExpenseMonthly(Long userId){
-        List<Object[]> results = transactionRepository.findExpenseByUserMonthly(userId);
-        return getExpenseStatistics(results);
-    }
-
-    public List<ExpenseStatistics> getExpenseYearly(Long userId){
-        List<Object[]> results = transactionRepository.findExpenseByUserYearly(userId);
-        return getExpenseStatistics(results);
-    }
-
-    public List<ExpenseStatistics> getExpenseLastXDays(Long userId, int X){
-        List<Object[]> results = transactionRepository.findExpenseByUserLastXDays(userId, X);
-        return getExpenseStatistics(results);
-    }
-
-    private List<ExpenseStatistics> getExpenseStatistics(List<Object[]> results) {
-        List<ExpenseStatistics> expenseStatisticsList = new ArrayList<>();
-
-        for (Object[] result : results) {
-            String timePeriod = (String) result[0];
-            Double expense = (Double) result[1];
-
-            ExpenseStatistics expenseStatistics = new ExpenseStatistics();
-            expenseStatistics.setTimePeriod(timePeriod);
-            expenseStatistics.setExpense(expense);
-
-            expenseStatisticsList.add(expenseStatistics);
-        }
-
-        return expenseStatisticsList;
     }
 }

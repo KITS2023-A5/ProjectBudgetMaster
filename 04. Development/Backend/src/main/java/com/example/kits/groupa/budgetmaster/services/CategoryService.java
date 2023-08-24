@@ -39,32 +39,4 @@ public class CategoryService {
         }
     }
 
-    public Category createCategory(Long userId, String name) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Category category = new Category();
-        if (categoryRepository.findByName(name) == null && user != null) {
-            category.setName(name);
-            categoryRepository.save(category);
-            return category;
-        } else {
-            throw new RuntimeException("Category already exists");
-        }
-    }
-
-    public Category updateCategory(Long userId, int categoryId, UpdateCategoryRequest updateCategoryRequest){
-        Optional<User> user = userRepository.findById(userId);
-        if(user.isPresent()) {
-            Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Category not found"));
-            if (categoryRepository.findByName(updateCategoryRequest.getName()) == null) {
-                category.setName(updateCategoryRequest.getName());
-                categoryRepository.save(category);
-                return category;
-            } else {
-                throw new RuntimeException("Category already exists");
-            }
-        }
-        else {
-            throw new RuntimeException("User not found");
-        }
-    }
 }
