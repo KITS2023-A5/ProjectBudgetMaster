@@ -11,5 +11,4 @@ public interface TransactionProjection {
     LocalDateTime getCreatedTime();
     LocalDateTime getUpdatedTime();
     byte[] getReceipt();
-    Type getType();
 }
