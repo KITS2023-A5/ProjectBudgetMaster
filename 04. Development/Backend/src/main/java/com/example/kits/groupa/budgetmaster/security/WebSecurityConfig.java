@@ -1,5 +1,6 @@
 package com.example.kits.groupa.budgetmaster.security;
 
+import com.example.kits.groupa.budgetmaster.entities.enumeration.ERole;
 import com.example.kits.groupa.budgetmaster.security.jwt.AuthEntryPointJwt;
 import com.example.kits.groupa.budgetmaster.security.jwt.AuthTokenFilter;
 import com.example.kits.groupa.budgetmaster.security.service.UserDetailsServiceImpl;
@@ -63,14 +64,11 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/test/**").permitAll()
-                                .requestMatchers("/**").permitAll()
-                                .requestMatchers("/api/user/**").hasAuthority(String.valueOf("ROLE_USER"))
-                                .requestMatchers("/api/admin/**").hasAuthority(String.valueOf("ROLE_ADMIN"))
-                                .requestMatchers("/api/all/**").hasAnyAuthority(String.valueOf("ROLE_USER"), String.valueOf("ROLE_ADMIN"))
+                                .requestMatchers("/api/user/**").hasAuthority(String.valueOf(ERole.ROLE_USER))
+                                .requestMatchers("/api/admin/**").hasAuthority(String.valueOf(ERole.ROLE_ADMIN))
+                                .requestMatchers("/api/all/**").hasAnyAuthority(String.valueOf(ERole.ROLE_USER), String.valueOf(ERole.ROLE_ADMIN))
                                 .anyRequest().authenticated()
-
                 );
-
 
         http.authenticationProvider(authenticationProvider());
 
