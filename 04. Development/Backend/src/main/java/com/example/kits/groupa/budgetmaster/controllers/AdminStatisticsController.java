@@ -27,4 +27,11 @@ public class AdminStatisticsController {
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
         return ResponseEntity.ok(adminStatisticsService.calculateIncomeAndExpenseByUser(userId));
     }
+
+    @GetMapping("/expense-by-category")
+    public ResponseEntity<?> getExpenseByUserCategory(@RequestHeader ("Authorization") String authorizationHeader){
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+        Long userId = jwtUtils.getUserIdFromJwtToken(token);
+        return ResponseEntity.ok(adminStatisticsService.getExpenseByUserCategory(userId));
+    }
 }

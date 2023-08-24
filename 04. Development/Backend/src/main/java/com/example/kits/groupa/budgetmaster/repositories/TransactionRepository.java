@@ -2,6 +2,7 @@ package com.example.kits.groupa.budgetmaster.repositories;
 
 import com.example.kits.groupa.budgetmaster.entities.Transaction;
 import com.example.kits.groupa.budgetmaster.entities.enumeration.Type;
+import com.example.kits.groupa.budgetmaster.payload.response.ExpenseUserCategory;
 import com.example.kits.groupa.budgetmaster.payload.response.TransactionResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -141,7 +142,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
 
     @Query("SELECT t.user.userId, t.user.username, SUM(CASE WHEN t.category.type = 'INCOME' THEN t.amount ELSE 0 END) AS income, " +
             "SUM(CASE WHEN t.category.type = 'EXPENSE' THEN t.amount ELSE 0 END) AS expense " +
-            "FROM Transaction t " +
+            "FROM Transaction t " + "WHERE t.visible=true " +
             "GROUP BY t.user.userId, t.user.username")
     List<Object[]> calculateIncomeAndExpenseByUser();
+
+    @Query("SELECT t.user.username, t.category.name, SUM(t.amount)" +
+            "FROM Transaction t " + "WHERE t.visible=true AND t.category.type='EXPENSE'" +
+            "GROUP BY t.user.username, t.category.name")
+    List<Object[]> getExpenseAllUserByCategory();
 }
