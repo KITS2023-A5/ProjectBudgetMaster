@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -36,5 +37,5 @@ public interface BudgetRepository extends JpaRepository<Budget, Integer> {
     @Query("SELECT new com.example.kits.groupa.budgetmaster.payload.response.BudgetResponse(b.budgetId, b.description, b.amount, b.startDate, b.endDate, b.category, b.user.userId) " +
             "FROM Budget b " +
             "WHERE b.user.userId = :userId AND b.startDate >= :startDate AND b.endDate <= :endDate AND b.visible=true")
-    Page<BudgetResponse> findBudgetsBetweenDates(Long userId, Date startDate, Date endDate, Pageable pageable);
+    Page<BudgetResponse> findBudgetsBetweenDates(Long userId, LocalDate startDate, LocalDate endDate, Pageable pageable);
 }

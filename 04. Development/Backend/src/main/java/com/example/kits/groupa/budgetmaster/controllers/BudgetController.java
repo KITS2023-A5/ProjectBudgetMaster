@@ -1,8 +1,6 @@
 package com.example.kits.groupa.budgetmaster.controllers;
 
-import com.example.kits.groupa.budgetmaster.entities.Budget;
 import com.example.kits.groupa.budgetmaster.payload.request.BudgetRequest;
-import com.example.kits.groupa.budgetmaster.payload.request.DateRequest;
 import com.example.kits.groupa.budgetmaster.payload.response.BudgetResponse;
 import com.example.kits.groupa.budgetmaster.security.jwt.JwtUtils;
 import com.example.kits.groupa.budgetmaster.services.BudgetService;
@@ -10,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/user/budget")
@@ -61,11 +59,12 @@ public class BudgetController {
 
     @GetMapping("/date")
     public ResponseEntity<?> getBudgetsBetweenDates(@RequestHeader("Authorization") String authorizationHeader,
-                                                    @RequestBody DateRequest date, Pageable pageable) {
+                                                    @RequestParam LocalDate startDate,
+                                                    @RequestParam LocalDate endDate, Pageable pageable) {
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
 
-        return ResponseEntity.ok(budgetService.getBudgetsBetweenDates(userId, date, pageable));
+        return ResponseEntity.ok(budgetService.getBudgetsBetweenDates(userId, startDate, endDate, pageable));
     }
 
     @PutMapping("/{budgetId}")

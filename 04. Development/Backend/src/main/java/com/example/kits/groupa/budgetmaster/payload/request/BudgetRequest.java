@@ -4,13 +4,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Date;
+import java.time.LocalDate;
+
 @Setter
 @Getter
 public class BudgetRequest {
     private String description;
     private double amount;
-    private Date startDate;
-    private Date endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     private int categoryId;
 }

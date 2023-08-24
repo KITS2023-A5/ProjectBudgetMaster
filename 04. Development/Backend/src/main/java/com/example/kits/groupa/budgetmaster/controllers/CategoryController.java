@@ -1,6 +1,7 @@
 package com.example.kits.groupa.budgetmaster.controllers;
 
 import com.example.kits.groupa.budgetmaster.entities.Category;
+import com.example.kits.groupa.budgetmaster.entities.enumeration.Type;
 import com.example.kits.groupa.budgetmaster.payload.request.UpdateCategoryRequest;
 import com.example.kits.groupa.budgetmaster.security.jwt.JwtUtils;
 import com.example.kits.groupa.budgetmaster.services.CategoryService;
@@ -31,5 +32,12 @@ public class CategoryController {
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
         return ResponseEntity.ok(categoryService.getById(userId, categoryId));
+    }
+
+    @GetMapping("/type/{type}")
+    public ResponseEntity<?> getCategoryByType(@RequestHeader("Authorization") String authorizationHeader, @PathVariable Type type) {
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+        Long userId = jwtUtils.getUserIdFromJwtToken(token);
+        return ResponseEntity.ok(categoryService.getByType(userId, type));
     }
 }
