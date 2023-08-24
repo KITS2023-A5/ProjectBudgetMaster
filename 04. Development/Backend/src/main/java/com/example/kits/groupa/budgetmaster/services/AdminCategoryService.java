@@ -23,26 +23,18 @@ public class AdminCategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    public Category createCategory(Long userId, String name) {
+    public Category createCategory(Long userId, Category newCategory) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Set<Role> roles = user.getRoles();
 
-
-        boolean isAdmin = roles.stream()
-                .anyMatch(role -> role.getName().equals(ERole.ROLE_ADMIN));
-
-        if (isAdmin) {
-            Category category = new Category();
-            if (categoryRepository.findByName(name) == null && user != null) {
-                category.setName(name);
-                categoryRepository.save(category);
-                return category;
-            } else {
-                throw new RuntimeException("Category already exists");
-            }
+        Category category = new Category();
+        if(categoryRepository.findByName(newCategory.getName()) == null && user!=null){
+            category.setName(newCategory.getName());
+            category.setType(newCategory.getType());
+            category.setColorCode(newCategory.getColorCode());
+            return categoryRepository.save(category);
         }
         else{
-            throw new AccessDeniedException("Access denied");
+            throw new RuntimeException("Category already exists");
         }
     }
 

@@ -20,11 +20,11 @@ public class AdminCategoryController {
         this.jwtUtils = jwtUtils;
     }
 
-    @PostMapping()
-    public ResponseEntity<Category> createCategory(@RequestHeader("Authorization") String authorizationHeader, @RequestParam String name) {
+    @PostMapping("")
+    public ResponseEntity<Category> createCategory(@RequestHeader("Authorization") String authorizationHeader, @RequestBody Category newCategory) {
         String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
         Long userId = jwtUtils.getUserIdFromJwtToken(token);
-        Category category = adminCategoryService.createCategory(userId, name);
+        Category category = adminCategoryService.createCategory(userId, newCategory);
         return ResponseEntity.ok(category);
     }
 

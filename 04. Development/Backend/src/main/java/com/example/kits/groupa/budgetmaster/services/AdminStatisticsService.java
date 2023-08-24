@@ -26,13 +26,14 @@ public class AdminStatisticsService {
 
     public List<UserIncomeResponse> calculateIncomeAndExpenseByUser(Long userId) {
         User user = userRepository.findById(userId).orElse(null);
-        Set<Role> roles = user.getRoles();
-
-
-        boolean isAdmin = roles.stream()
-                .anyMatch(role -> role.getName().equals(ERole.ROLE_ADMIN));
-
-        if (isAdmin) {
+//        Set<Role> roles = user.getRoles();
+//
+//
+//        boolean isAdmin = roles.stream()
+//                .anyMatch(role -> role.getName().equals(ERole.ROLE_ADMIN));
+//
+//        if (isAdmin) {
+        if(user!=null){
             List<Object[]> results = transactionRepository.calculateIncomeAndExpenseByUser();
             List<UserIncomeResponse> UserIncomeResponses = new ArrayList<>();
 
@@ -45,7 +46,6 @@ public class AdminStatisticsService {
                 UserIncomeResponse UserIncomeResponse = new UserIncomeResponse(id, username, income, expense);
                 UserIncomeResponses.add(UserIncomeResponse);
             }
-
             return UserIncomeResponses;
         }
         else{
