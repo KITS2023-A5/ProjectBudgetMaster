@@ -48,7 +48,7 @@ public class FinancialSummaryService {
         double totalSavings = 0;
 
         for (TransactionProjection transaction : monthlyTransactions) {
-            if (transaction.getType().equals(Type.INCOME)) {
+            if (transaction.getCategory().getType().equals(Type.INCOME)) {
                 totalIncome += transaction.getAmount();
             } else {
                 totalExpense += transaction.getAmount();
@@ -73,7 +73,7 @@ public class FinancialSummaryService {
         double expenses = 0;
 
         for (TransactionProjection transaction : transactions) {
-            if (transaction.getType() == Type.EXPENSE) {
+            if (transaction.getCategory().getType() == Type.EXPENSE) {
                 expenses += transaction.getAmount();
             } else {
                 income += transaction.getAmount();
@@ -94,7 +94,7 @@ public class FinancialSummaryService {
             double windowExpenses = 0;
 
             for (TransactionProjection transaction : window) {
-                if (transaction.getType() == Type.EXPENSE) {
+                if (transaction.getCategory().getType() == Type.EXPENSE) {
                     windowExpenses += transaction.getAmount();
                 } else {
                     windowIncome += transaction.getAmount();

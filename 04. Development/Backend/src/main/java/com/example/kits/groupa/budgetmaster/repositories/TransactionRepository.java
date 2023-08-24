@@ -18,42 +18,42 @@ import java.util.List;
 public interface TransactionRepository extends JpaRepository<Transaction, Integer>{
 
     @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, " +
-            "t.updatedTime AS updatedTime, t.receipt AS receipt " +
+            "t.updatedTime AS updatedTime, t.receipt AS receipt, t.category AS category " +
             "FROM Transaction t " +
             "WHERE t.user.userId = :userId and t.visible=true")
     Page<TransactionProjection> findByUserId(@Param("userId") Long userId, Pageable pageable);
 
     @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, " +
-            "t.updatedTime AS updatedTime, t.receipt AS receipt " +
+            "t.updatedTime AS updatedTime, t.receipt AS receipt, t.category AS category  " +
             "FROM Transaction t " +
             "WHERE t.user.userId = :userId and t.visible=true")
     List<TransactionProjection> findByUserId(@Param("userId") Long userId);
 
     @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, " +
-            "t.updatedTime AS updatedTime, t.receipt AS receipt " +
+            "t.updatedTime AS updatedTime, t.receipt AS receipt, t.category AS category  " +
             "FROM Transaction t " +
             "WHERE t.user.userId = :userId AND t.category.type = 'EXPENSE' AND t.visible=true")
     Page<TransactionProjection> findAllExpenseByUserId(Long userId, Pageable pageable);
 
     @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, " +
-            "t.updatedTime AS updatedTime, t.receipt AS receipt " +
+            "t.updatedTime AS updatedTime, t.receipt AS receipt, t.category AS category  " +
             "FROM Transaction t " +
             "WHERE t.category.name LIKE %:category% AND t.user.userId = :userId AND t.visible=true")
     Page<TransactionProjection> findAllByCategoryName(@Param("category") String category, @Param("userId") Long userId, Pageable pageable);
 
     @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, " +
-            "t.updatedTime AS updatedTime, t.receipt AS receipt FROM Transaction t " +
+            "t.updatedTime AS updatedTime, t.receipt AS receipt, t.category AS category  FROM Transaction t " +
             "WHERE t.category.categoryId = :categoryId AND t.user.userId = :userId AND t.visible=true")
     Page<TransactionProjection> findAllByCategory(@Param("categoryId") int categoryId, @Param("userId") Long userId, Pageable pageable);
 
     @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, " +
-            "t.updatedTime AS updatedTime, t.receipt AS receipt " +
+            "t.updatedTime AS updatedTime, t.receipt AS receipt, t.category AS category  " +
             "FROM Transaction t " +
             "WHERE t.user.userId = :userId AND t.createdTime BETWEEN :start AND :end AND t.visible=true")
     Page<TransactionProjection> findAllBetweenDates(LocalDateTime start, LocalDateTime end, Long userId, Pageable pageable);
 
     @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, " +
-            "t.updatedTime AS updatedTime, t.receipt AS receipt " +
+            "t.updatedTime AS updatedTime, t.receipt AS receipt, t.category AS category  " +
             "FROM Transaction t " +
             "WHERE t.user.userId = :userId AND t.createdTime BETWEEN :start AND :end AND t.visible=true order by t.createdTime desc")
     List<TransactionProjection> findAllBetweenDates(LocalDateTime start, LocalDateTime end, Long userId);
@@ -62,7 +62,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
     Transaction findByTransactionIdAndUserId(int transactionId, Long userId);
 
     @Query("SELECT t.transactionId AS transactionId, t.amount AS amount, t.description AS description, t.createdTime AS createdTime, " +
-            "t.updatedTime AS updatedTime, t.receipt AS receipt FROM Transaction t " +
+            "t.updatedTime AS updatedTime, t.receipt AS receipt, t.category AS category FROM Transaction t " +
             "WHERE t.category.type = :type AND t.user.userId = :userId AND t.visible=true")
     Page<TransactionProjection> findTransactionByType(Type type, Long userId, Pageable pageable);
 
