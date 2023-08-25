@@ -12,6 +12,7 @@ import {
   Row,
   Select,
   Upload,
+  notification,
 } from "antd";
 import Header from "../../layouts/header";
 import Footer from "../../layouts/footer";
@@ -32,11 +33,16 @@ import { useEffect, useState } from "react";
 import { PhoneRegExp } from "../../utils/validation";
 import { GENDERS } from "../../constants";
 import { useDispatch, useSelector } from "react-redux";
-import { requestGetUserFromToken } from "../../redux/slices/authSlice";
+import {
+  requestGetUserFromToken,
+  requestUpdateUser,
+  requestUpdateUserPassword,
+} from "../../redux/slices/authSlice";
 import { unwrapResult } from "@reduxjs/toolkit";
 import Loading from "../../components/loading";
 import moment from "moment";
 import { useForm } from "antd/es/form/Form";
+import dayjs from "dayjs";
 
 const cx = classNames.bind(styles);
 
@@ -45,10 +51,8 @@ const ProfilePage = () => {
   const userInfo = useSelector((state) => state.auth.userInfo);
   const loading = useSelector((state) => state.auth.loading);
   const [formEditProfile] = useForm();
-
-  const [formChangepassword] = Form.useForm();
-  const [formDeleteAccount] = Form.useForm();
-  // const [formEditProfile] = Form.useForm();
+  const [formChangepassword] = useForm();
+  const [formDeleteAccount] = useForm();
 
   const [isModalChangePasswordOpen, setIsModalChangePasswordOpen] =
     useState(false);
@@ -61,37 +65,83 @@ const ProfilePage = () => {
       formEditProfile.setFieldsValue({
         name: userInfo?.name,
         phoneNumber: userInfo?.phone,
-        birth: userInfo?.dob ? moment(userInfo?.dob) : null,
+        dob: userInfo?.dob ? dayjs(userInfo?.dob) : null,
         gender: userInfo?.gender,
       });
-    console.log(userInfo);
   }, [formEditProfile, userInfo]);
-
-  // useEffect(() => {
-  //   handleGetUserInfo();
-  // }, []);
-  // const handleGetUserInfo = async () => {
-  //   try {
-  //     const actionResult = await dispatch(requestGetUserFromToken());
-  //     const res = unwrapResult(actionResult);
-  //   } catch (error) {
-  //     console.log("error", error);
-  //   }
-  // };
 
   const handleChangePasswordOpen = () => {
     setIsModalChangePasswordOpen(true);
   };
 
   const handleChangePasswordOk = () => {
-    setIsModalChangePasswordOpen(false);
+    formChangepassword.validateFields().then(async (value) => {
+      const { currentPassword, newPassword, confirmPassword } = value;
+      try {
+        const actionResult = await dispatch(
+          requestUpdateUserPassword({
+            currentPassword,
+            newPassword,
+            confirmPassword,
+          })
+        );
+        const res = unwrapResult(actionResult);
+        if (res.status === 200) {
+          notification.success({
+            message: "Change Password successfully",
+            duration: 1.5,
+          });
+        } else {
+          notification.error({
+            message: "Password Change failed",
+            duration: 1.5,
+          });
+        }
+      } catch (error) {
+        notification.error({
+          message: "Server Error",
+          duration: 1.5,
+        });
+      }
+    });
+    handleChangePasswordCancel();
+  };
+
+  const handleEditProfileOk = () => {
+    formEditProfile.validateFields().then(async (value) => {
+      try {
+        console.log({ value });
+        const res = await dispatch(
+          requestUpdateUser({
+            name: value.name,
+            phoneNumber: value.phoneNumber,
+            gender: value.gender,
+            currency: null,
+            dob: value.dob,
+          })
+        );
+        const actionResult = await dispatch(requestGetUserFromToken());
+        unwrapResult(actionResult);
+        notification.success({
+          message: "Update User successfully",
+          duration: 1.5,
+        });
+      } catch (error) {
+        notification.error({
+          message: "Server Error",
+          duration: 1.5,
+        });
+      }
+    });
+    setIsModalEditProfileOpen(false);
   };
 
   const handleChangePasswordCancel = () => {
+    // formChangepassword.resetFields();
     formChangepassword.setFieldsValue({
-      password: "",
       newPassword: "",
-      confirmNewPassword: "",
+      currentPassword: "",
+      confirmPassword: "",
     });
     setIsModalChangePasswordOpen(false);
   };
@@ -113,10 +163,6 @@ const ProfilePage = () => {
 
   const handleEditProfileOpen = () => {
     setIsModalEditProfileOpen(true);
-  };
-
-  const handleEditProfileOk = () => {
-    setIsModalEditProfileOpen(false);
   };
 
   const handleEditProfileCancel = () => {
@@ -346,7 +392,7 @@ const ProfilePage = () => {
                                 </div>
                                 <div className={cx("profile__info--value")}>
                                   {userInfo && userInfo.gender != null
-                                    ? userInfo.gender
+                                    ? userInfo.gender.toLowerCase()
                                     : " "}
                                 </div>
                               </div>
@@ -374,7 +420,7 @@ const ProfilePage = () => {
               name="changePassword"
               layout="vertical"
             >
-              <Form.Item name="password" label={"Current password"}>
+              <Form.Item name="currentPassword" label={"Current password"}>
                 <Input
                   type="password"
                   placeholder="Current password"
@@ -417,7 +463,7 @@ const ProfilePage = () => {
                 />
               </Form.Item>
               <Form.Item
-                name="confirmNewPassword"
+                name="confirmPassword"
                 label={"Confirm new password"}
                 dependencies={["newPassword"]}
                 rules={[
@@ -475,7 +521,16 @@ const ProfilePage = () => {
             forceRender={true}
           >
             <Form form={formEditProfile} name="editProfile" layout="vertical">
-              <Form.Item name="name" label={"Name"}>
+              <Form.Item
+                name="name"
+                label={"Name"}
+                rules={[
+                  {
+                    required: true,
+                    message: "Please enter this field!",
+                  },
+                ]}
+              >
                 <Input type="text" style={{ padding: "1.2rem" }} />
               </Form.Item>
 
@@ -524,7 +579,7 @@ const ProfilePage = () => {
               </Form.Item>
 
               <Form.Item
-                name="birth"
+                name="dob"
                 label={"Birth"}
                 rules={[
                   {

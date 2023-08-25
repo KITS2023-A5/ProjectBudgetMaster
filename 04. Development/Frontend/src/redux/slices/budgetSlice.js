@@ -5,12 +5,21 @@ const initialState = {
   budgets: [],
   loading: false,
   budgetInfo: null,
+  totalCount: null,
 };
 
-export const requestGetAllbudget = createAsyncThunk("user/budget", async () => {
-  const res = await axiosInstance.get("/user/budget/all");
-  return res.data;
-});
+export const requestGetAllbudget = createAsyncThunk(
+  "user/budget",
+  async ({ page, size }) => {
+    const res = await axiosInstance.get("/user/budget/all", {
+      params: {
+        page,
+        size,
+      },
+    });
+    return res.data;
+  }
+);
 
 export const requestCreateBudget = createAsyncThunk(
   "user/createBudget",
@@ -23,7 +32,6 @@ export const requestCreateBudget = createAsyncThunk(
 export const requestUpdateBudget = createAsyncThunk(
   "user/updateBudget",
   async (props) => {
-    // console.log({ ...props });
     const res = await axiosInstance.put(`/user/budget/${props.budgetId}`, {
       ...props,
     });
@@ -34,8 +42,15 @@ export const requestUpdateBudget = createAsyncThunk(
 export const requestFindBudgetByDte = createAsyncThunk(
   "user/findBudgetByDate",
   async (props) => {
-    console.log({ ...props });
     const res = await axiosInstance.get("/user/budget/date", { ...props });
+    return { data: res.data, status: res.status };
+  }
+);
+
+export const requestDeleteBudget = createAsyncThunk(
+  "user/deleteBudget",
+  async (props) => {
+    const res = await axiosInstance.post(`/user/budget/${props.budgetId}`);
     return { data: res.data, status: res.status };
   }
 );
@@ -50,6 +65,7 @@ export const budgetSlice = createSlice({
       requestCreateBudget,
       requestUpdateBudget,
       requestFindBudgetByDte,
+      requestDeleteBudget,
     ];
     actionList.forEach((action) => {
       builder.addCase(action.pending, (state) => {
@@ -64,8 +80,8 @@ export const budgetSlice = createSlice({
 
     //requestGetAllbudget
     builder.addCase(requestGetAllbudget.fulfilled, (state, action) => {
-      // console.log(action.payload);
-      state.budgets = action.payload;
+      state.budgets = action.payload.budgets;
+      state.totalCount = action.payload.totalCount;
       state.loading = false;
     });
 
@@ -76,12 +92,16 @@ export const budgetSlice = createSlice({
 
     builder.addCase(requestUpdateBudget.fulfilled, (state, action) => {
       state.budgetInfo = action.payload;
-      // console.log({ payload: action.payload });
       state.loading = false;
     });
 
     builder.addCase(requestFindBudgetByDte.fulfilled, (state, action) => {
       state.budgets = action.payload;
+      state.loading = false;
+    });
+
+    builder.addCase(requestDeleteBudget.fulfilled, (state, action) => {
+      state.budgetInfo = action.payload;
       state.loading = false;
     });
   },

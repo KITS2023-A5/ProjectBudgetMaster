@@ -45,7 +45,6 @@ const SignupPage = () => {
   }, []);
 
   const onFinish = async (values) => {
-    console.log({ ...values, role: ["ROLE_USER"] });
     try {
       const actionResult = await dispatch(requestRegister(values));
       const res = unwrapResult(actionResult);

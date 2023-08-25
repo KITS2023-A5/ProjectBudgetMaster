@@ -6,6 +6,8 @@ import {
   Input,
   Layout,
   Modal,
+  Pagination,
+  Popconfirm,
   Row,
   Select,
   Space,
@@ -26,6 +28,7 @@ import { useForm } from "antd/es/form/Form";
 import { useDispatch, useSelector } from "react-redux";
 import {
   requestCreateBudget,
+  requestDeleteBudget,
   requestGetAllbudget,
   requestUpdateBudget,
 } from "../../redux/slices/budgetSlice";
@@ -43,9 +46,13 @@ const BudgetPage = () => {
   const [categoryDatas, setCategoryDatas] = useState([]);
   const [valueEdit, setValueEdit] = useState();
   const [isEdit, setIsEdit] = useState(false);
+  const [totalBudgets, setTotalBudgets] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   const dispatch = useDispatch();
   const budgets = useSelector((state) => state.budget.budgets);
+  const totalCount = useSelector((state) => state.budget.totalCount);
   const loading = useSelector((state) => state.budget.loading);
 
   const showModal = () => {
@@ -57,7 +64,6 @@ const BudgetPage = () => {
   const handleOk = () => {
     form.validateFields().then(async (value) => {
       try {
-        // console.log({ value });
         if (!isEdit) {
           const data = await dispatch(
             requestCreateBudget({
@@ -82,7 +88,6 @@ const BudgetPage = () => {
           );
           unwrapResult(data);
         }
-
         loadAllBudget();
         handleCancel();
 
@@ -98,6 +103,29 @@ const BudgetPage = () => {
     });
     setIsModalOpen(false);
   };
+
+  const handleDeleteBudget = async (budgetId) => {
+    try {
+      budgetId;
+      const data = await dispatch(
+        requestDeleteBudget({
+          budgetId,
+        })
+      );
+      unwrapResult(data);
+      loadAllBudget();
+      notification.success({
+        message: "Delete successfully",
+        duration: 1.5,
+      });
+    } catch (error) {
+      notification.error({
+        message: "Delete error",
+        duration: 1.5,
+      });
+    }
+  };
+
   const handleCancel = () => {
     form.resetFields();
     setValueEdit(undefined);
@@ -117,19 +145,21 @@ const BudgetPage = () => {
   }, [valueEdit]);
 
   useEffect(() => {
-    loadAllBudget();
     loadAllCategory();
   }, []);
 
-  // useEffect(() => {
-  //   setBudgetDatas(budgets);
-  // }, [budgets]);
+  useEffect(() => {
+    loadAllBudget(currentPage - 1, pageSize);
+  }, [currentPage, pageSize]);
 
-  const loadAllBudget = async () => {
+  const loadAllBudget = async (currentPage, pageSize) => {
     try {
-      const result = await dispatch(requestGetAllbudget());
+      const result = await dispatch(
+        requestGetAllbudget({ page: currentPage, size: pageSize })
+      );
       const res = unwrapResult(result);
-      setBudgetDatas(res.map((e) => ({ ...e, key: e.budgetId })));
+      setTotalBudgets(res.totalBudgets);
+      setBudgetDatas(res.budgets.map((e) => ({ ...e, key: e.budgetId })));
     } catch (error) {
       notification.error({
         message: "No results",
@@ -147,6 +177,11 @@ const BudgetPage = () => {
         message: "Load category error",
       });
     }
+  };
+
+  const handleChangePage = (page, pageSize) => {
+    setCurrentPage(page);
+    setPageSize(pageSize);
   };
 
   const columns = [
@@ -198,11 +233,21 @@ const BudgetPage = () => {
               <FaPenToSquare className={cx("action__icon")} />
             </Button>
           </Tooltip>
-          <Tooltip placement="top" title="Delete">
-            <Button className={cx("action__btn")}>
-              <FaTrashCan className={cx("action__icon")} />
-            </Button>
-          </Tooltip>
+          <Popconfirm
+            placement="bottomRight"
+            title="Are you sure?"
+            onConfirm={() => {
+              handleDeleteBudget(text.budgetId);
+            }}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Tooltip placement="top" title="Delete">
+              <Button className={cx("action__btn")}>
+                <FaTrashCan className={cx("action__icon")} />
+              </Button>
+            </Tooltip>
+          </Popconfirm>
         </Space>
       ),
     },
@@ -289,10 +334,19 @@ const BudgetPage = () => {
                     columns={columns}
                     dataSource={budgetDatas}
                     loading={loading}
-                    pagination={{
-                      pageSize: 13,
-                      total: budgets.length,
-                      // current: 1,
+                    pagination={false}
+                  />
+                  <Pagination
+                    showSizeChanger
+                    onShowSizeChange={handleChangePage}
+                    pageSizeOptions={[5, 10, 15]}
+                    defaultPageSize={5}
+                    total={totalCount}
+                    onChange={handleChangePage}
+                    style={{
+                      marginTop: "2rem",
+                      display: "flex",
+                      justifyContent: "flex-end",
                     }}
                   />
                 </div>

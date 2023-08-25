@@ -36,7 +36,6 @@ const LoginPage = () => {
         requestLogin({ usernameOrEmail, password })
       );
       const res = unwrapResult(actionResult);
-
       switch (res.status) {
         case 200:
           Cookies.set("token", res.data.token, {
@@ -47,7 +46,6 @@ const LoginPage = () => {
             message: "Login successful",
             duration: 1.5,
           });
-
         default:
           return notification.error({
             message: "Login failed",

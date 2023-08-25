@@ -49,8 +49,7 @@ axiosInstance.interceptors.response.use(
   },
   (err) => {
     const statusCode = err?.response?.status;
-    if (statusCode !== 200) {
-      // console.log("FORCE_LOGIN");
+    if (statusCode === 401) {
       PubSub.publish("FORCE_LOGIN");
     }
     return err?.response;
