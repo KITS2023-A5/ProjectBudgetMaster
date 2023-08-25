@@ -10,11 +10,14 @@ import {
   Form,
   Input,
   Layout,
+  Pagination,
   Row,
   Select,
   Space,
   Table,
+  Tag,
   Tooltip,
+  notification,
 } from "antd";
 import Sidebar from "../../layouts/sidebar";
 import Header from "../../layouts/header";
@@ -23,38 +26,109 @@ import { TRANSACTION_TYPE } from "../../constants";
 import Upload from "antd/es/upload/Upload";
 import { FaPenToSquare, FaTrashCan } from "react-icons/fa6";
 import moment from "moment";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { unwrapResult } from "@reduxjs/toolkit";
+import { requestGetAllTransaction } from "../../redux/slices/transactionSlice";
+import { requestGetAllCategory } from "../../redux/slices/categorySlice";
+import dayjs from "dayjs";
 
 const cx = classNames.bind(styles);
 
 const TransactionPage = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [transactionDatas, setTransactionDatas] = useState([]);
   const [form] = useForm();
+
+  const dispatch = useDispatch();
+  const transactions = useSelector((state) => state.transaction.transactions);
+  const categorys = useSelector((state) => state.category.categorys);
+  const totalCount = useSelector((state) => state.transaction.totalCount);
+  const loading = useSelector((state) => state.transaction.loading);
+
+  useEffect(() => {
+    loadAllTransaction(currentPage - 1, pageSize);
+  }, [currentPage, pageSize]);
+
+  useEffect(() => {
+    // loadAllCategory();
+  }, []);
+
+  const handleChangePage = (page, pageSize) => {
+    setCurrentPage(page);
+    setPageSize(pageSize);
+  };
+
+  const loadAllTransaction = async (currentPage, pageSize) => {
+    try {
+      const result = await dispatch(
+        requestGetAllTransaction({ page: currentPage, size: pageSize })
+      );
+      const res = unwrapResult(result);
+      // console.log({ res });
+      setTransactionDatas(
+        res.transactions.map((e) => ({
+          ...e,
+          key: e.transactionId,
+        }))
+      );
+    } catch (error) {
+      notification.error({
+        message: "No results",
+      });
+    }
+  };
+
+  const loadAllCategory = async () => {
+    try {
+      const result = await dispatch(requestGetAllCategory());
+      const res = unwrapResult(result);
+    } catch (error) {
+      notification.error({
+        message: "Load category error",
+      });
+    }
+  };
 
   const columns = [
     {
       title: "Type",
       key: "type",
-      dataIndex: "type",
+      dataIndex: "category",
       ellipsis: true,
+      render: (text) => <>{text.type}</>,
     },
     {
       title: "Category",
       key: "category",
       dataIndex: "category",
       ellipsis: true,
+      render: (_, record) => (
+        <>
+          <Tag
+            color={record.category.colorCode}
+            key={record.category.categoryId}
+          >
+            {record.category.name.toUpperCase()}
+          </Tag>
+        </>
+      ),
     },
     {
       title: "Amount",
       dataIndex: "amount",
-      defaultSortOrder: ["descend", "ascend"],
       sorter: (a, b) => a.amount - b.amount,
       ellipsis: true,
     },
     {
       title: "Date",
-      dataIndex: "date",
-      defaultSortOrder: ["descend", "ascend"],
-      sorter: (a, b) => a.date - b.date,
+      dataIndex: "createdTime",
+      sorter: (a, b) =>
+        dayjs(a.createdTime).valueOf() - dayjs(b.createdTime).valueOf(),
       ellipsis: true,
+      render: (text) => <>{dayjs(text).format("YYYY-MM-DD")}</>,
     },
     {
       title: "Action",
@@ -62,7 +136,12 @@ const TransactionPage = () => {
       render: (_, record) => (
         <Space size="small">
           <Tooltip placement="top" title="Edit">
-            <Button className={cx("action__btn")} onClick={showModal}>
+            <Button
+              className={cx("action__btn")}
+              onClick={() => {
+                // setIsModalOpen(true);
+              }}
+            >
               <FaPenToSquare className={cx("action__icon")} />
             </Button>
           </Tooltip>
@@ -243,11 +322,23 @@ const TransactionPage = () => {
                         <Table
                           className={cx("transaction__table")}
                           columns={columns}
-                          // dataSource={datas}
-                          pagination={{
-                            pageSize: 5,
-                          }}
+                          dataSource={transactionDatas}
+                          pagination={false}
                           scroll={{ x: 500 }}
+                          loading={loading}
+                        />
+                        <Pagination
+                          showSizeChanger
+                          onShowSizeChange={handleChangePage}
+                          pageSizeOptions={[5, 10, 15]}
+                          defaultPageSize={5}
+                          total={totalCount}
+                          onChange={handleChangePage}
+                          style={{
+                            marginTop: "2rem",
+                            display: "flex",
+                            justifyContent: "flex-end",
+                          }}
                         />
                       </Card>
                     </Col>

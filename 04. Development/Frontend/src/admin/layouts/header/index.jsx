@@ -27,7 +27,6 @@ const Header = () => {
   const [activeImageOption, setActiveImageOption] = useState(
     IMAGE_FILTERS[3].value
   );
-
   const dispatch = useDispatch();
   const collapsed = useSelector((state) => state.collapsed);
 
@@ -58,7 +57,6 @@ const Header = () => {
   };
 
   const onChange = (e) => {
-    console.log(e.target.value);
     setColorValue(e.target.value);
   };
 
@@ -70,6 +68,16 @@ const Header = () => {
       style: {
         fontSize: "1.4rem",
         padding: "0.8rem",
+      },
+      onClick: async () => {
+        try {
+          const result = await dispatch(requestGetUserFromToken());
+          unwrapResult(result);
+        } catch (error) {
+          notification.error({
+            message: "Server error",
+          });
+        }
       },
     },
     {

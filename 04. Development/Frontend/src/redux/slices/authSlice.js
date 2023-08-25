@@ -25,7 +25,6 @@ export const requestRegister = createAsyncThunk(
       ...props,
       role: ["ROLE_USER"],
     });
-
     // return res;
     return { data: res.data, status: res.status };
   }
@@ -39,6 +38,25 @@ export const requestGetUserFromToken = createAsyncThunk(
   }
 );
 
+export const requestUpdateUser = createAsyncThunk(
+  "user/update",
+  async (props) => {
+    console.log({ props });
+    const res = await axiosInstance.put("/user/update", { ...props });
+    return res.data;
+  }
+);
+
+export const requestUpdateUserPassword = createAsyncThunk(
+  "user/updatePassword",
+  async (props) => {
+    const res = await axiosInstance.post("/user/update-password", {
+      ...props,
+    });
+    return { data: res.data, status: res.status };
+  }
+);
+
 export const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -48,7 +66,11 @@ export const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    const actionList = [requestLogin];
+    const actionList = [
+      requestLogin,
+      requestUpdateUserPassword,
+      requestUpdateUser,
+    ];
     actionList.forEach((action) => {
       builder.addCase(action.pending, (state) => {
         state.loading = true;
@@ -76,6 +98,13 @@ export const authSlice = createSlice({
     builder.addCase(requestGetUserFromToken.fulfilled, (state, action) => {
       state.userInfo = action.payload;
       state.loadingCheckLogin = false;
+    });
+
+    builder.addCase(requestUpdateUserPassword.fulfilled, (state, action) => {
+      state.loading = false;
+    });
+    builder.addCase(requestUpdateUser.fulfilled, (state, action) => {
+      state.loading = false;
     });
   },
 });
